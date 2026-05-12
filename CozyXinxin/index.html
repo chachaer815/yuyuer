@@ -191,6 +191,20 @@
             .toolbar-actions-overlay.show {
                 display: block;
             }
+            .search-bar {
+                padding: 4px 5px;
+                gap: 2px;
+            }
+            .search-bar input {
+                min-width: 40px;
+                max-width: 60px;
+                font-size: 11px;
+                padding: 3px 4px;
+            }
+            .mini-btn {
+                padding: 3px 5px;
+                font-size: 10px;
+            }
         }
 
         .editor-tabs {
@@ -202,17 +216,23 @@
             font-size: 12px;
         }
         .search-bar {
-            padding: 6px 8px;
-            gap: 4px;
+            padding: 5px 6px;
+            gap: 3px;
             flex-wrap: nowrap;
             overflow-x: auto;
             -webkit-overflow-scrolling: touch;
         }
         .search-bar input {
-            min-width: 60px;
-            font-size: 13px;
-            padding: 5px 6px;
-            flex-shrink: 0;
+            min-width: 45px;
+            max-width: 80px;
+            font-size: 12px;
+            padding: 4px 5px;
+            flex-shrink: 1;
+        }
+        .mini-btn {
+            padding: 4px 6px;
+            font-size: 11px;
+            min-height: auto;
         }
         .preview-header {
             padding: 6px 10px;
