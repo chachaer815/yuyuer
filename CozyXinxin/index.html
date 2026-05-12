@@ -135,9 +135,7 @@
             background: rgba(255, 255, 255, 0.15);
         }
         .toolbar-actions {
-            display: flex;
-            gap: 4px;
-            flex-shrink: 0;
+            display: none;
         }
 
         @media (max-width: 768px) {
@@ -190,6 +188,24 @@
             }
             .toolbar-actions-overlay.show {
                 display: block;
+            }
+        }
+
+        @media (min-width: 769px) {
+            .toolbar-actions {
+                position: relative;
+                bottom: auto;
+                left: auto;
+                right: auto;
+                display: flex !important;
+                transform: none;
+                background: transparent;
+                border: none;
+                padding: 0;
+                box-shadow: none;
+                max-height: none;
+                overflow: visible;
+                flex-wrap: nowrap;
             }
         }
 
@@ -670,6 +686,18 @@
 </head>
 <body>
     <div class="toolbar-actions-overlay" id="toolbarOverlay"></div>
+    <div class="toolbar-actions" id="toolbarActions">
+        <button class="btn btn-secondary" id="saveAsProject">另存为</button>
+        <button class="btn btn-secondary" id="replaceCssBtn">CSS替换</button>
+        <button class="btn btn-secondary" id="replaceJsonBtn">JSON替换</button>
+        <button class="btn btn-secondary" id="downloadAllBtn">一键全下</button>
+        <button class="btn btn-danger" id="cleanCommentBtn">清理注释</button>
+        <button class="btn btn-secondary" id="formatCode">格式化代码</button>
+        <button class="btn btn-secondary" id="fontSizeToggle">字号</button>
+        <button class="btn btn-secondary" id="configFeishu">飞书配置</button>
+        <button class="btn btn-secondary" id="configGithub">GitHub配置</button>
+        <button class="btn btn-danger" id="clearAllBtn">一键清空</button>
+    </div>
     <div class="toolbar" id="mainToolbar">
         <button class="btn btn-secondary" id="toggleSidebar">📁</button>
         <button class="btn btn-secondary" id="newProject">新建</button>
@@ -688,19 +716,6 @@
         <button class="btn btn-secondary" id="redoBtn">↪️</button>
 
         <button class="btn btn-toggle" id="draftToggle">草稿</button>
-
-        <div class="toolbar-actions">
-            <button class="btn btn-secondary" id="saveAsProject">另存为</button>
-            <button class="btn btn-secondary" id="replaceCssBtn">CSS替换</button>
-            <button class="btn btn-secondary" id="replaceJsonBtn">JSON替换</button>
-            <button class="btn btn-secondary" id="downloadAllBtn">一键全下</button>
-            <button class="btn btn-danger" id="cleanCommentBtn">清理注释</button>
-            <button class="btn btn-secondary" id="formatCode">格式化代码</button>
-            <button class="btn btn-secondary" id="fontSizeToggle">字号</button>
-            <button class="btn btn-secondary" id="configFeishu">飞书配置</button>
-            <button class="btn btn-secondary" id="configGithub">GitHub配置</button>
-            <button class="btn btn-danger" id="clearAllBtn">一键清空</button>
-        </div>
 
         <button class="mobile-more-btn" id="moreActionsBtn">•••</button>
     </div>
@@ -1420,7 +1435,7 @@ ${html}
             };
 
             const moreActionsBtn = document.getElementById('moreActionsBtn');
-            const toolbarActions = document.querySelector('.toolbar-actions');
+            const toolbarActions = document.getElementById('toolbarActions');
             const toolbarOverlay = document.getElementById('toolbarOverlay');
             
             function showMobileMenu() {
