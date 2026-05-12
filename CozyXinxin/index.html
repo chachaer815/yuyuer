@@ -155,24 +155,39 @@
             }
             .toolbar-actions {
                 position: fixed;
-                bottom: 0;
+                top: 46px;
                 left: 0;
                 right: 0;
                 background: rgba(20, 20, 40, 0.98);
                 backdrop-filter: blur(12px);
-                border-top: 1px solid rgba(255, 255, 255, 0.1);
+                border-bottom: 1px solid rgba(255, 255, 255, 0.1);
                 padding: 12px;
                 flex-wrap: wrap;
-                z-index: 1000;
+                z-index: 999;
                 display: none !important;
-                transform: translateY(100%);
+                transform: translateY(-100%);
                 transition: transform 0.3s ease;
-                box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3);
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
                 justify-content: center;
+                max-height: 60vh;
+                overflow-y: auto;
             }
             .toolbar-actions.mobile-show {
                 display: flex !important;
                 transform: translateY(0);
+            }
+            .toolbar-actions-overlay {
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0, 0, 0, 0.5);
+                z-index: 998;
+                display: none;
+            }
+            .toolbar-actions-overlay.show {
+                display: block;
             }
             .editor-tabs {
                 overflow-x: auto;
@@ -648,6 +663,7 @@
     </style>
 </head>
 <body>
+    <div class="toolbar-actions-overlay" id="toolbarOverlay"></div>
     <div class="toolbar" id="mainToolbar">
         <button class="btn btn-secondary" id="toggleSidebar">📁</button>
         <button class="btn btn-secondary" id="newProject">新建</button>
@@ -1387,13 +1403,34 @@ ${html}
 
             const moreActionsBtn = document.getElementById('moreActionsBtn');
             const toolbarActions = document.querySelector('.toolbar-actions');
+            const toolbarOverlay = document.getElementById('toolbarOverlay');
+            
+            function showMobileMenu() {
+                toolbarActions.classList.add('mobile-show');
+                toolbarOverlay.classList.add('show');
+                document.body.style.overflow = 'hidden';
+            }
+            
+            function hideMobileMenu() {
+                toolbarActions.classList.remove('mobile-show');
+                toolbarOverlay.classList.remove('show');
+                document.body.style.overflow = '';
+            }
+            
             moreActionsBtn.onclick = (e) => {
                 e.stopPropagation();
-                toolbarActions.classList.toggle('mobile-show');
+                if(toolbarActions.classList.contains('mobile-show')){
+                    hideMobileMenu();
+                } else {
+                    showMobileMenu();
+                }
             };
+            
+            toolbarOverlay.onclick = hideMobileMenu;
+            
             document.addEventListener('click', (e) => {
                 if(!e.target.closest('.toolbar-actions') && !e.target.closest('#moreActionsBtn')){
-                    toolbarActions.classList.remove('mobile-show');
+                    hideMobileMenu();
                 }
             });
 
