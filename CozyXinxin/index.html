@@ -1,0 +1,911 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>全能HTML预览工作台</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        }
+        body {
+            background-color: #1e1e1e;
+            color: #e0e0e0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .toolbar {
+            padding: 8px 12px;
+            background: #252526;
+            border-bottom: 1px solid #3c3c3c;
+            display: flex;
+            gap: 6px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .btn {
+            padding: 6px 10px;
+            border: none;
+            border-radius: 3px;
+            background: #0e639c;
+            color: #fff;
+            font-size: 12px;
+            cursor: pointer;
+            transition: background 0.2s;
+            white-space: nowrap;
+        }
+        .btn:hover { background: #1177bb; }
+        .btn-secondary { background: #3c3c3c; }
+        .btn-secondary:hover { background: #4c4c4c; }
+        .btn-danger { background: #c53030; }
+        .btn-success { background: #28a745; }
+        .btn-warn { background: #d69e2e; }
+        .btn-purple { background: #9368e9; }
+        .btn-toggle { background: #555; }
+        .btn-toggle.on { background: #28a745; }
+
+        .main-wrap {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
+        }
+        .project-sidebar {
+            width: 0;
+            overflow: hidden;
+            border-right: none;
+            background: #252526;
+            display: flex;
+            flex-direction: column;
+            transition: width 0.3s;
+        }
+        .sidebar-show {
+            width: 240px;
+            border-right: 1px solid #3c3c3c;
+        }
+        .sidebar-title {
+            padding: 12px;
+            font-size: 14px;
+            font-weight: bold;
+            border-bottom: 1px solid #3c3c3c;
+            display: flex;
+            justify-content: space-between;
+        }
+        .project-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 8px;
+        }
+        .project-item {
+            padding: 8px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+            margin-bottom: 4px;
+            background: #2d2d2d;
+        }
+        .project-item:hover { background: #383838; }
+        .project-item.active { background: #0e639c; }
+        .project-time {
+            font-size: 11px;
+            color: #999;
+            margin-top: 2px;
+        }
+        .project-ops {
+            display: flex;
+            gap: 4px;
+            margin-top: 6px;
+        }
+        .mini-btn {
+            font-size: 11px;
+            padding: 2px 6px;
+            border-radius: 2px;
+            background: #444;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+        .mini-btn:hover { background: #555; }
+
+        .editor-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid #3c3c3c;
+            transition: all 0.3s ease;
+        }
+        .editor-panel.hide-left {
+            flex: 0 0 0;
+            opacity: 0;
+            overflow: hidden;
+            border-right: none;
+        }
+        .editor-tabs {
+            display: flex;
+            background: #252526;
+            border-bottom: 1px solid #3c3c3c;
+        }
+        .tab {
+            padding: 9px 18px;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            font-size: 13px;
+        }
+        .tab.active {
+            border-bottom-color: #0e639c;
+            color: #fff;
+        }
+        .editor-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        textarea {
+            flex: 1;
+            width: 100%;
+            background: #1e1e1e;
+            color: #dcdcaa;
+            border: none;
+            padding: 14px;
+            font-family: Consolas, 'Courier New', monospace;
+            font-size: 14px;
+            resize: none;
+            outline: none;
+        }
+        .preview-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .preview-header {
+            padding: 8px 16px;
+            background: #252526;
+            border-bottom: 1px solid #3c3c3c;
+            font-size: 13px;
+            color: #999;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        .iframe-wrap {
+            flex: 1;
+            overflow: auto;
+        }
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            background: #fff;
+        }
+        .modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            opacity: 0;
+            visibility: hidden;
+            transition: 0.3s;
+        }
+        .modal.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        .modal-box {
+            width: 90%;
+            max-width: 480px;
+            background: #252526;
+            border-radius: 6px;
+            padding: 20px;
+            border: 1px solid #3c3c3c;
+            z-index: 10000;
+        }
+        .modal-box h3 {
+            margin-bottom: 16px;
+            color: #fff;
+            font-size: 16px;
+        }
+        .form-group {
+            margin-bottom: 14px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 13px;
+            color: #ccc;
+        }
+        .form-group input, .form-group textarea {
+            width: 100%;
+            padding: 9px;
+            background: #1e1e1e;
+            border: 1px solid #3c3c3c;
+            border-radius: 4px;
+            color: #e0e0e0;
+            font-size: 13px;
+            outline: none;
+        }
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+            margin-top: 20px;
+        }
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            padding: 10px 20px;
+            border-radius: 4px;
+            font-size: 13px;
+            z-index: 20000;
+            opacity: 0;
+            transition: 0.3s;
+            color: #fff;
+        }
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+        .toast.success { background: #28a745; }
+        .toast.error { background: #dc3545; }
+        .toast.loading { background: #0e639c; }
+        .hidden { display: none; }
+        .checkbox-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin: 8px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="toolbar">
+        <button class="btn btn-secondary" id="toggleSidebar">项目列表</button>
+        <button class="btn btn-secondary" id="newProject">新建</button>
+        <button class="btn btn-secondary" id="saveProject">保存</button>
+        <button class="btn btn-secondary" id="saveAsProject">另存为</button>
+
+        <button class="btn btn-secondary" id="importFileBtn">导入文件</button>
+        <input type="file" id="fileInput" accept=".html,.htm,.css,.json" multiple class="hidden">
+
+        <button class="btn btn-warn" id="replaceHtmlBtn">HTML替换</button>
+        <button class="btn btn-warn" id="replaceCssBtn">CSS替换</button>
+        <button class="btn btn-warn" id="replaceJsonBtn">JSON替换</button>
+
+        <button class="btn btn-secondary" id="downloadSelectBtn">下载选择</button>
+        <button class="btn btn-secondary" id="downloadAllBtn">一键全下</button>
+        <button class="btn btn-success" id="mergeExportBtn">合并导出HTML</button>
+        <button class="btn btn-purple" id="splitHtmlBtn">拆分HTML</button>
+        <button class="btn btn-danger" id="cleanCommentBtn">清理AI注释</button>
+
+        <button class="btn btn-toggle" id="draftToggle">自动草稿：关</button>
+
+        <button class="btn" id="fullscreenBtn">预览全屏</button>
+        <button class="btn btn-secondary" id="configFeishu">飞书配置</button>
+        <button class="btn btn-secondary" id="configGithub">GitHub配置</button>
+        <button class="btn btn-danger" id="clearAllBtn">一键清空</button>
+    </div>
+
+    <div class="main-wrap">
+        <div class="project-sidebar" id="projectSidebar">
+            <div class="sidebar-title">
+                <span>我的项目</span>
+                <span class="mini-btn" id="refreshProject">刷新</span>
+            </div>
+            <div class="project-list" id="projectList"></div>
+        </div>
+
+        <div class="editor-panel" id="editorPanel">
+            <div class="editor-tabs">
+                <div class="tab active" data-tab="html">HTML</div>
+                <div class="tab" data-tab="css">CSS</div>
+                <div class="tab" data-tab="json">JSON</div>
+            </div>
+            <div class="editor-content">
+                <textarea id="htmlEditor" placeholder="编写HTML结构..."></textarea>
+                <textarea id="cssEditor" class="hidden" placeholder="编写CSS样式..."></textarea>
+                <textarea id="jsonEditor" class="hidden" placeholder="编写JSON配置..."></textarea>
+            </div>
+        </div>
+
+        <div class="preview-panel" id="previewPanel">
+            <div class="preview-header">
+                <span>实时预览</span>
+                <button class="mini-btn" id="refreshPreview">刷新预览</button>
+            </div>
+            <div class="iframe-wrap">
+                <iframe id="previewFrame"></iframe>
+            </div>
+        </div>
+    </div>
+
+    <!-- 保存弹窗 -->
+    <div class="modal" id="saveModal">
+        <div class="modal-box">
+            <h3>保存项目</h3>
+            <div class="form-group">
+                <label>项目名称</label>
+                <input type="text" id="projectNameInput" placeholder="输入项目名">
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" id="cancelSave">取消</button>
+                <button class="btn" id="confirmSave">确定保存</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- GitHub推送弹窗 -->
+    <div class="modal" id="githubPushModal">
+        <div class="modal-box">
+            <h3>推送到GitHub</h3>
+            <div class="checkbox-row">
+                <label><input type="checkbox" id="pushHtml" checked disabled> 推送HTML</label>
+            </div>
+            <div class="checkbox-row">
+                <label><input type="checkbox" id="pushCss"> 推送CSS</label>
+            </div>
+            <div class="checkbox-row">
+                <label><input type="checkbox" id="pushJson"> 推送JSON</label>
+            </div>
+            <div class="form-group">
+                <label>提交备注</label>
+                <input type="text" id="commitMsg" value="更新项目代码">
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" id="cancelGithubPush">取消</button>
+                <button class="btn btn-success" id="confirmGithubPush">确认推送</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 查找替换通用弹窗 -->
+    <div class="modal" id="replaceModal">
+        <div class="modal-box">
+            <h3 id="replaceTitle">查找替换</h3>
+            <div class="form-group">
+                <label>查找内容</label>
+                <input type="text" id="findText">
+            </div>
+            <div class="form-group">
+                <label>替换为</label>
+                <input type="text" id="replaceText">
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" id="cancelReplace">取消</button>
+                <button class="btn" id="doReplace">全部替换</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 下载选择弹窗 -->
+    <div class="modal" id="downloadModal">
+        <div class="modal-box">
+            <h3>选择下载文件</h3>
+            <div class="checkbox-row">
+                <label><input type="checkbox" id="downHtml" checked> 下载HTML</label>
+            </div>
+            <div class="checkbox-row">
+                <label><input type="checkbox" id="downCss"> 下载CSS</label>
+            </div>
+            <div class="checkbox-row">
+                <label><input type="checkbox" id="downJson"> 下载JSON</label>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" id="cancelDownload">取消</button>
+                <button class="btn" id="confirmDownload">确认下载</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 飞书配置 -->
+    <div class="modal" id="feishuConfigModal">
+        <div class="modal-box">
+            <h3>飞书配置</h3>
+            <div class="form-group"><label>App ID</label><input type="text" id="feishuAppId"></div>
+            <div class="form-group"><label>App Secret</label><input type="text" id="feishuAppSecret"></div>
+            <div class="form-group"><label>表格Token</label><input type="text" id="feishuTableToken"></div>
+            <div class="form-group"><label>表格ID</label><input type="text" id="feishuTableId"></div>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" id="testFeishuBtn">测试连接</button>
+                <button class="btn btn-secondary" id="closeFeishuConfig">关闭</button>
+                <button class="btn" id="saveFeishuConfig">保存配置</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- GitHub配置 -->
+    <div class="modal" id="githubConfigModal">
+        <div class="modal-box">
+            <h3>GitHub配置</h3>
+            <div class="form-group"><label>用户名</label><input type="text" id="githubUsername"></div>
+            <div class="form-group"><label>仓库名</label><input type="text" id="githubRepo"></div>
+            <div class="form-group"><label>分支</label><input type="text" id="githubBranch" value="main"></div>
+            <div class="form-group"><label>Token</label><input type="text" id="githubToken"></div>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" id="closeGithubConfig">关闭</button>
+                <button class="btn" id="saveGithubConfig">保存配置</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        let currentTab = 'html';
+        let currentProjectId = null;
+        let feishuConfig = JSON.parse(localStorage.getItem('feishuConfig')) || {};
+        let githubConfig = JSON.parse(localStorage.getItem('githubConfig')) || {};
+        let isPreviewFull = false;
+        let replaceTarget = 'html';
+        let autoDraftOn = localStorage.getItem('autoDraftOn') === '1';
+
+        const htmlEditor = document.getElementById('htmlEditor');
+        const cssEditor = document.getElementById('cssEditor');
+        const jsonEditor = document.getElementById('jsonEditor');
+        const previewFrame = document.getElementById('previewFrame');
+        const tabs = document.querySelectorAll('.tab');
+        const toast = document.getElementById('toast');
+        const projectSidebar = document.getElementById('projectSidebar');
+        const draftToggle = document.getElementById('draftToggle');
+
+        function updateDraftBtnText(){
+            if(autoDraftOn){
+                draftToggle.innerText = "自动草稿：开";
+                draftToggle.classList.add("on");
+            }else{
+                draftToggle.innerText = "自动草稿：关";
+                draftToggle.classList.remove("on");
+            }
+        }
+        updateDraftBtnText();
+
+        let db;
+        function initIndexedDB() {
+            const req = indexedDB.open('HtmlPreviewDB', 1);
+            req.onupgradeneeded = e => {
+                db = e.target.result;
+                if(!db.objectStoreNames.contains('projects')) {
+                    const st = db.createObjectStore('projects', {keyPath:'id',autoIncrement:true});
+                    st.createIndex('name','name');
+                }
+            };
+            req.onsuccess = e => {
+                db = e.target.result;
+                renderProjectList();
+                if(autoDraftOn) autoRecoverDraft();
+            };
+        }
+        function dbAdd(store,data){return new Promise(res=>{let t=db.transaction(store,'readwrite'),o=t.objectStore(store),r=o.add(data);r.onsuccess=e=>res(e.target.result);});}
+        function dbPut(store,data){return new Promise(res=>{let t=db.transaction(store,'readwrite'),o=t.objectStore(store);o.put(data).onsuccess=()=>res();});}
+        function dbDel(store,id){return new Promise(res=>{let t=db.transaction(store,'readwrite'),o=t.objectStore(store);o.delete(id).onsuccess=()=>res();});}
+        function dbAll(store){return new Promise(res=>{let t=db.transaction(store,'readonly'),o=t.objectStore(store),arr=[];o.openCursor().onsuccess=e=>{let c=e.target.result;if(c){arr.push(c.value);c.continue();}else res(arr);};});}
+
+        initIndexedDB();
+        init();
+
+        function init() {
+            document.getElementById('feishuAppId').value = feishuConfig.appId||'';
+            document.getElementById('feishuAppSecret').value = feishuConfig.appSecret||'';
+            document.getElementById('feishuTableToken').value = feishuConfig.tableToken||'';
+            document.getElementById('feishuTableId').value = feishuConfig.tableId||'';
+
+            document.getElementById('githubUsername').value = githubConfig.username||'';
+            document.getElementById('githubRepo').value = githubConfig.repo||'';
+            document.getElementById('githubBranch').value = githubConfig.branch||'main';
+            document.getElementById('githubToken').value = githubConfig.token||'';
+
+            tabs.forEach(t=>t.onclick=switchTab);
+            [htmlEditor,cssEditor,jsonEditor].forEach(el=>{
+                el.oninput = ()=>{
+                    updatePreview();
+                    if(autoDraftOn) autoSaveDraft();
+                };
+            });
+
+            draftToggle.onclick = ()=>{
+                autoDraftOn = !autoDraftOn;
+                localStorage.setItem('autoDraftOn', autoDraftOn ? '1' : '0');
+                updateDraftBtnText();
+                if(autoDraftOn){
+                    autoSaveDraft();
+                    showToast("已开启自动草稿","success");
+                }else{
+                    localStorage.removeItem('previewDraft');
+                    showToast("已关闭自动草稿，并清除旧草稿","success");
+                }
+            };
+
+            document.getElementById('toggleSidebar').onclick = ()=>{
+                projectSidebar.classList.toggle('sidebar-show');
+            };
+
+            document.getElementById('newProject').onclick=newProject;
+            document.getElementById('saveProject').onclick=saveProjectHandle;
+            document.getElementById('saveAsProject').onclick=saveAsProjectHandle;
+            document.getElementById('refreshProject').onclick=renderProjectList;
+            document.getElementById('clearAllBtn').onclick=clearAllContent;
+            document.getElementById('refreshPreview').onclick=updatePreview;
+            document.getElementById('fullscreenBtn').onclick=togglePreviewFull;
+
+            document.getElementById('importFileBtn').onclick=()=>document.getElementById('fileInput').click();
+            document.getElementById('fileInput').onchange=handleImportFile;
+
+            document.getElementById('replaceHtmlBtn').onclick=()=>openReplace('html');
+            document.getElementById('replaceCssBtn').onclick=()=>openReplace('css');
+            document.getElementById('replaceJsonBtn').onclick=()=>openReplace('json');
+            document.getElementById('cancelReplace').onclick=()=>document.getElementById('replaceModal').classList.remove('show');
+            document.getElementById('doReplace').onclick=doReplaceAll;
+
+            document.getElementById('downloadSelectBtn').onclick=openDownloadModal;
+            document.getElementById('downloadAllBtn').onclick=downloadAllNow;
+            document.getElementById('cancelDownload').onclick=()=>document.getElementById('downloadModal').classList.remove('show');
+            document.getElementById('confirmDownload').onclick=confirmDownload;
+
+            document.getElementById('mergeExportBtn').onclick=mergeExportHtml;
+            document.getElementById('splitHtmlBtn').onclick=splitHtmlToThree;
+            document.getElementById('cleanCommentBtn').onclick=cleanAllComment;
+
+            document.getElementById('configFeishu').onclick=()=>document.getElementById('feishuConfigModal').classList.add('show');
+            document.getElementById('closeFeishuConfig').onclick=()=>document.getElementById('feishuConfigModal').classList.remove('show');
+            document.getElementById('saveFeishuConfig').onclick=saveFeishuConfig;
+
+            document.getElementById('configGithub').onclick=()=>document.getElementById('githubConfigModal').classList.add('show');
+            document.getElementById('closeGithubConfig').onclick=()=>document.getElementById('githubConfigModal').classList.remove('show');
+            document.getElementById('saveGithubConfig').onclick=saveGithubConfig;
+
+            document.getElementById('pushGithubBtn').onclick=openGithubPushModal;
+            document.getElementById('cancelGithubPush').onclick=()=>document.getElementById('githubPushModal').classList.remove('show');
+            document.getElementById('confirmGithubPush').onclick=confirmPushToGithub;
+
+            document.getElementById('cancelSave').onclick=()=>document.getElementById('saveModal').classList.remove('show');
+            document.getElementById('confirmSave').onclick=confirmSaveProject;
+
+            window.onbeforeunload = e=>{
+                if(autoDraftOn && (htmlEditor.value.trim()||cssEditor.value.trim()||jsonEditor.value.trim())){
+                    e.returnValue = '内容未保存，确定离开？';
+                }
+            };
+            updatePreview();
+        }
+
+        function switchTab(e){
+            currentTab = e.target.dataset.tab;
+            tabs.forEach(t=>t.classList.remove('active'));
+            e.target.classList.add('active');
+            htmlEditor.classList.add('hidden');
+            cssEditor.classList.add('hidden');
+            jsonEditor.classList.add('hidden');
+            if(currentTab==='html')htmlEditor.classList.remove('hidden');
+            if(currentTab==='css')cssEditor.classList.remove('hidden');
+            if(currentTab==='json')jsonEditor.classList.remove('hidden');
+        }
+
+        function updatePreview(){
+            const html = htmlEditor.value;
+            const css = cssEditor.value;
+            let jt = jsonEditor.value.trim();
+            try{jt=jt?JSON.stringify(JSON.parse(jt)):'{}';}catch(e){jt='{}';}
+            const page = `
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>${css}</style>
+</head>
+<body>
+${html}
+<script>window.previewJson=${jt};<\/script>
+</body>
+</html>`;
+            const doc = previewFrame.contentDocument;
+            doc.open();doc.write(page);doc.close();
+        }
+
+        function clearAllContent(){
+            htmlEditor.value='';cssEditor.value='';jsonEditor.value='';
+            currentProjectId=null;
+            if(!autoDraftOn){
+                localStorage.removeItem('previewDraft');
+            }
+            updatePreview();
+            showToast('已清空','success');
+        }
+
+        async function renderProjectList(){
+            const list = await dbAll('projects');
+            const wrap = document.getElementById('projectList');
+            wrap.innerHTML='';
+            list.sort((a,b)=>b.createTime-a.createTime);
+            list.forEach(item=>{
+                const div = document.createElement('div');
+                div.className = 'project-item'+(item.id===currentProjectId?' active':'');
+                div.innerHTML = `
+                    <div>${item.name}</div>
+                    <div class="project-time">${fmtTime(item.createTime)}</div>
+                    <div class="project-ops">
+                        <span class="mini-btn" onclick="loadProj(${item.id})">加载</span>
+                        <span class="mini-btn" onclick="delProj(${item.id})">删除</span>
+                    </div>
+                `;
+                wrap.appendChild(div);
+            });
+        }
+        function fmtTime(t){
+            const d=new Date(t);
+            return `${d.getMonth()+1}-${d.getDate()} ${d.getHours()}:${d.getMinutes()}`;
+        }
+        window.loadProj = async id=>{
+            const list = await dbAll('projects');
+            const item = list.find(x=>x.id===id);
+            if(!item)return;
+            currentProjectId = item.id;
+            htmlEditor.value=item.html||'';
+            cssEditor.value=item.css||'';
+            jsonEditor.value=item.json||'';
+            updatePreview();renderProjectList();
+            showToast('已加载','success');
+        };
+        window.delProj = async id=>{
+            if(!confirm('确定删除？'))return;
+            await dbDel('projects',id);
+            if(currentProjectId===id)currentProjectId=null;
+            renderProjectList();
+            showToast('已删除','success');
+        };
+
+        function newProject(){clearAllContent();showToast('新建空白项目','success');}
+        function saveProjectHandle(){currentProjectId?confirmSaveProject():openSaveModal();}
+        function saveAsProjectHandle(){openSaveModal();}
+        function openSaveModal(){
+            document.getElementById('projectNameInput').value='';
+            document.getElementById('saveModal').classList.add('show');
+        }
+        async function confirmSaveProject(){
+            const name = document.getElementById('projectNameInput').value.trim();
+            if(!name)return showToast('请输入项目名','error');
+            const data = {
+                name,html:htmlEditor.value,css:cssEditor.value,json:jsonEditor.value,
+                createTime:Date.now()
+            };
+            if(currentProjectId){
+                data.id = currentProjectId;
+                await dbPut('projects',data);
+                showToast('已更新','success');
+            }else{
+                currentProjectId = await dbAdd('projects',data);
+                showToast('已保存','success');
+            }
+            document.getElementById('saveModal').classList.remove('show');
+            renderProjectList();
+        }
+
+        function autoSaveDraft(){
+            const d = {html:htmlEditor.value,css:cssEditor.value,json:jsonEditor.value};
+            localStorage.setItem('previewDraft',JSON.stringify(d));
+        }
+        function autoRecoverDraft(){
+            const s = localStorage.getItem('previewDraft');
+            if(!s)return;
+            const d = JSON.parse(s);
+            htmlEditor.value = d.html||'';
+            cssEditor.value = d.css||'';
+            jsonEditor.value = d.json||'';
+            updatePreview();
+        }
+
+        function handleImportFile(e){
+            const files = e.target.files;
+            if(!files.length)return;
+            for(let f of files){
+                const ext = f.name.split('.').pop().toLowerCase();
+                const reader = new FileReader();
+                reader.onload=evt=>{
+                    const txt = evt.target.result;
+                    if(ext==='html'||ext==='htm'){htmlEditor.value=txt;switchTabByKey('html');}
+                    if(ext==='css'){cssEditor.value=txt;switchTabByKey('css');}
+                    if(ext==='json'){jsonEditor.value=txt;switchTabByKey('json');}
+                    updatePreview();
+                    if(autoDraftOn) autoSaveDraft();
+                };
+                reader.readAsText(f);
+            }
+            document.getElementById('fileInput').value='';
+            showToast('导入成功','success');
+        }
+        function switchTabByKey(key){
+            currentTab = key;
+            tabs.forEach(t=>{
+                if(t.dataset.tab===key) t.click();
+            });
+        }
+
+        function openReplace(type){
+            replaceTarget = type;
+            const title = type==='html'?'HTML查找替换':type==='css'?'CSS查找替换':'JSON查找替换';
+            document.getElementById('replaceTitle').innerText = title;
+            document.getElementById('findText').value='';
+            document.getElementById('replaceText').value='';
+            document.getElementById('replaceModal').classList.add('show');
+        }
+        function doReplaceAll(){
+            const find = document.getElementById('findText').value;
+            const rep = document.getElementById('replaceText').value;
+            if(!find)return showToast('请输入查找内容','error');
+            let editor = replaceTarget==='html' ? htmlEditor : replaceTarget==='css' ? cssEditor : jsonEditor;
+            editor.value = editor.value.split(find).join(rep);
+            updatePreview();
+            if(autoDraftOn) autoSaveDraft();
+            document.getElementById('replaceModal').classList.remove('show');
+            showToast('替换完成','success');
+        }
+
+        function openDownloadModal(){
+            document.getElementById('downHtml').checked = htmlEditor.value.trim()!=='';
+            document.getElementById('downCss').checked = cssEditor.value.trim()!=='';
+            document.getElementById('downJson').checked = jsonEditor.value.trim()!=='';
+            document.getElementById('downloadModal').classList.add('show');
+        }
+        function confirmDownload(){
+            let down = false;
+            if(document.getElementById('downHtml').checked && htmlEditor.value.trim()){downloadFile('index.html',htmlEditor.value);down=true;}
+            if(document.getElementById('downCss').checked && cssEditor.value.trim()){downloadFile('style.css',cssEditor.value);down=true;}
+            if(document.getElementById('downJson').checked && jsonEditor.value.trim()){downloadFile('config.json',jsonEditor.value);down=true;}
+            document.getElementById('downloadModal').classList.remove('show');
+            if(!down)showToast('没有可下载内容','error');
+            else showToast('下载已开始','success');
+        }
+        function downloadAllNow(){
+            let has = false;
+            if(htmlEditor.value.trim()){downloadFile('index.html',htmlEditor.value);has=true;}
+            if(cssEditor.value.trim()){downloadFile('style.css',cssEditor.value);has=true;}
+            if(jsonEditor.value.trim()){downloadFile('config.json',jsonEditor.value);has=true;}
+            if(!has)showToast('没有可下载内容','error');
+            else showToast('一键下载完成','success');
+        }
+        function downloadFile(name,content){
+            const blob = new Blob([content],{type:'text/plain'});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;a.download = name;
+            document.body.appendChild(a);a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        function mergeExportHtml(){
+            const html = htmlEditor.value;
+            const css = cssEditor.value.trim();
+            const jsonTxt = jsonEditor.value.trim();
+            let styleBlock = css ? `<style>\n${css}\n</style>\n` : '';
+            let jsonBlock = '';
+            if(jsonTxt){
+                try{
+                    const jsonObj = JSON.parse(jsonTxt);
+                    jsonBlock = `<script>window.previewConfig = ${JSON.stringify(jsonObj,null,2)};<\/script>\n`;
+                }catch(e){
+                    return showToast('JSON格式错误，无法合并','error');
+                }
+            }
+            const merged = `<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+${styleBlock}
+</head>
+<body>
+${html}
+${jsonBlock}
+</body>
+</html>`;
+            downloadFile('merged_index.html', merged);
+            showToast('合并导出成功','success');
+        }
+
+        function splitHtmlToThree(){
+            let full = htmlEditor.value;
+            let cssContent = '';
+            let jsonContent = '';
+            const styleReg = /<style[\s\S]*?>([\s\S]*?)<\/style>/gi;
+            const styleMatch = full.match(styleReg);
+            if(styleMatch){
+                cssContent = styleMatch.map(item=>item.replace(/<style[\s\S]*?>|<\/style>/gi,'').trim()).join('\n\n');
+                full = full.replace(styleReg,'').trim();
+            }
+            const jsonReg = /window\.previewConfig\s*=\s*(\{[\s\S]*?\});?/gi;
+            const jsonMatch = full.match(jsonReg);
+            if(jsonMatch){
+                let jsonStr = jsonMatch[0].replace(/window\.previewConfig\s*=|;$/g,'').trim();
+                try{
+                    jsonContent = JSON.stringify(JSON.parse(jsonStr),null,2);
+                }catch(e){}
+                full = full.replace(jsonReg,'').trim();
+            }
+            htmlEditor.value = full;
+            cssEditor.value = cssContent;
+            jsonEditor.value = jsonContent;
+            if(autoDraftOn) autoSaveDraft();
+            switchTabByKey('html');
+            updatePreview();
+            showToast('拆分完成','success');
+        }
+
+        function cleanAllComment(){
+            let h = htmlEditor.value.replace(/<!--[\s\S]*?-->/g,'').replace(/\n\s*\n/g,'\n').trim();
+            htmlEditor.value = h;
+            let c = cssEditor.value.replace(/\/\*[\s\S]*?\*\//g,'').replace(/\n\s*\n/g,'\n').trim();
+            cssEditor.value = c;
+            let j = jsonEditor.value.replace(/\/\/.*$/gm,'').replace(/\n\s*\n/g,'\n').trim();
+            jsonEditor.value = j;
+            if(autoDraftOn) autoSaveDraft();
+            updatePreview();
+            showToast('已清理所有AI描述注释','success');
+        }
+
+        function togglePreviewFull(){
+            isPreviewFull = !isPreviewFull;
+            const p = document.getElementById('editorPanel');
+            if(isPreviewFull){
+                p.classList.add('hide-left');
+                document.getElementById('fullscreenBtn').textContent='退出预览全屏';
+                showToast('预览已全屏','success');
+            }else{
+                p.classList.remove('hide-left');
+                document.getElementById('fullscreenBtn').textContent='预览全屏';
+                showToast('已退出全屏','success');
+            }
+        }
+
+        function saveFeishuConfig(){
+            const cfg = {
+                appId:document.getElementById('feishuAppId').value.trim(),
+                appSecret:document.getElementById('feishuAppSecret').value.trim(),
+                tableToken:document.getElementById('feishuTableToken').value.trim(),
+                tableId:document.getElementById('feishuTableId').value.trim()
+            };
+            if(!cfg.appId||!cfg.appSecret||!cfg.tableToken||!cfg.tableId)return showToast('请填完整','error');
+            feishuConfig=cfg;localStorage.setItem('feishuConfig',JSON.stringify(cfg));
+            document.getElementById('feishuConfigModal').classList.remove('show');
+            showToast('飞书配置已保存','success');
+        }
+
+        function saveGithubConfig(){
+            const cfg = {
+                username:document.getElementById('githubUsername').value.trim(),
+                repo:document.getElementById('githubRepo').value.trim(),
+                branch:document.getElementById('githubBranch').value.trim()||'main',
+                token:document.getElementById('githubToken').value.trim()
+            };
+            if(!cfg.username||!cfg.repo||!cfg.token)return showToast('请填完整GitHub配置','error');
+            githubConfig=cfg;localStorage.setItem('githubConfig',JSON.stringify(cfg));
+            document.getElementById('githubConfigModal').classList.remove('show');
+            showToast('GitHub配置已保存','success');
+        }
+        function openGithubPushModal(){
+            if(!githubConfig.username||!githubConfig.repo||!githubConfig.token){
+                return showToast('请先配置GitHub','error');
+            }
+            document.getElementById('pushCss').checked = cssEditor.value.trim()!=='';
+            document.getElementById('pushJson').checked = jsonEditor.value.trim()!=='';
+            document.getElementById('githubPushModal').classList.add('show');
+        }
+        function confirmPushToGithub(){
+            showToast('推送功能已预留','success');
+            document.getElementById('githubPushModal').classList.remove('show');
+        }
+
+        function showToast(msg,type=''){
+            toast.textContent=msg;
+            toast.className='toast '+type+' show';
+            setTimeout(()=>toast.classList.remove('show'),3000);
+        }
+    </script>
+</body>
+</html>
