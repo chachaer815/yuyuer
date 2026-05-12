@@ -11,14 +11,13 @@
             padding: 0;
             box-sizing: border-box;
             font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            /* 禁止选中、防止意外拖动变形 */
-            user-select: none;
-            -webkit-user-select: none;
+            -webkit-tap-highlight-color: transparent;
         }
         body {
             background-color: #1e1e1e;
             color: #e0e0e0;
             height: 100vh;
+            height: 100dvh;
             width: 100vw;
             display: flex;
             flex-direction: column;
@@ -26,29 +25,44 @@
             position: fixed;
             top: 0;
             left: 0;
+            touch-action: manipulation;
         }
         .toolbar {
-            padding: 8px 12px;
+            padding: 8px 10px;
             background: #252526;
             border-bottom: 1px solid #3c3c3c;
             display: flex;
-            gap: 6px;
+            gap: 5px;
             align-items: center;
-            flex-wrap: wrap;
-            flex-shrink: 0; /* 固定高度，不压缩 */
+            flex-wrap: nowrap;
+            flex-shrink: 0;
+            overflow-x: auto;
+            overflow-y: visible;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
         }
-        .btn {
-            padding: 6px 10px;
-            border: none;
-            border-radius: 3px;
-            background: #0e639c;
-            color: #fff;
-            font-size: 12px;
-            cursor: pointer;
-            transition: background 0.2s;
-            white-space: nowrap;
+        .toolbar::-webkit-scrollbar { display: none; }
+        .toolbar .btn-group {
+            display: flex;
+            gap: 4px;
             flex-shrink: 0;
         }
+        .btn {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 4px;
+            background: #0e639c;
+            color: #fff;
+            font-size: 13px;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.1s;
+            white-space: nowrap;
+            flex-shrink: 0;
+            min-height: 36px;
+            touch-action: manipulation;
+        }
+        .btn:active { transform: scale(0.96); }
         .btn:hover { background: #1177bb; }
         .btn-secondary { background: #3c3c3c; }
         .btn-secondary:hover { background: #4c4c4c; }
@@ -58,6 +72,115 @@
         .btn-purple { background: #9368e9; }
         .btn-toggle { background: #555; }
         .btn-toggle.on { background: #28a745; }
+        .mobile-more-btn {
+            display: none;
+            padding: 8px 10px;
+            background: #3c3c3c;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            min-height: 36px;
+        }
+        .toolbar-actions {
+            display: flex;
+            gap: 4px;
+            flex-shrink: 0;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                font-size: 14px;
+            }
+            .toolbar {
+                padding: 6px 8px;
+                gap: 4px;
+            }
+            .btn {
+                padding: 6px 10px;
+                font-size: 12px;
+                min-height: 34px;
+            }
+            .toolbar-actions {
+                position: absolute;
+                top: 100%;
+                left: 0;
+                right: 0;
+                background: #252526;
+                border-bottom: 1px solid #3c3c3c;
+                padding: 8px;
+                flex-wrap: wrap;
+                z-index: 100;
+                display: none !important;
+            }
+            .toolbar-actions.show {
+                display: flex !important;
+            }
+            .editor-tabs {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+            .tab {
+                padding: 8px 12px;
+                font-size: 12px;
+            }
+            .search-bar {
+                padding: 6px 8px;
+                gap: 4px;
+            }
+            .search-bar input {
+                min-width: 80px;
+                font-size: 14px;
+                padding: 6px 8px;
+            }
+            .preview-header {
+                padding: 6px 10px;
+            }
+            .status-bar {
+                padding: 3px 8px;
+                font-size: 10px;
+                gap: 10px;
+            }
+            .project-sidebar {
+                position: absolute;
+                z-index: 200;
+                height: calc(100% - 50px);
+                top: 50px;
+            }
+            .sidebar-show {
+                width: 200px;
+            }
+            .main-wrap {
+                position: relative;
+            }
+            dialog {
+                width: 95%;
+                max-width: 95%;
+                padding: 15px;
+            }
+            .form-group input {
+                font-size: 16px !important;
+            }
+            .shortcuts-hint {
+                right: 5px;
+                bottom: 50px;
+                max-width: 250px;
+                font-size: 11px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .btn {
+                padding: 5px 8px;
+                font-size: 11px;
+                min-height: 32px;
+            }
+            .btn span { display: none; }
+            .tab {
+                padding: 6px 10px;
+            }
+        }
 
         .main-wrap {
             flex: 1;
@@ -169,12 +292,18 @@
             background: #1e1e1e;
             color: #dcdcaa;
             border: none;
-            padding: 14px;
+            padding: 12px;
             font-family: Consolas, 'Courier New', monospace;
-            font-size: 16px !important; /* 关键：≥16px 防止iOS放大 */
+            font-size: 16px !important;
             resize: none;
             outline: none;
             overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            line-height: 1.5;
+            tab-size: 2;
+            -moz-tab-size: 2;
+            -webkit-user-select: text;
+            user-select: text;
         }
         .preview-panel {
             flex: 1;
@@ -392,34 +521,39 @@
     </style>
 </head>
 <body>
-    <div class="toolbar">
-        <button class="btn btn-secondary" id="toggleSidebar">项目列表</button>
+    <div class="toolbar" id="mainToolbar">
+        <button class="btn btn-secondary" id="toggleSidebar">📁</button>
         <button class="btn btn-secondary" id="newProject">新建</button>
-        <button class="btn btn-secondary" id="saveProject">保存</button>
-        <button class="btn btn-secondary" id="saveAsProject">另存为</button>
+        <button class="btn btn-secondary" id="saveProject">💾</button>
 
-        <button class="btn btn-secondary" id="importFileBtn">导入文件</button>
+        <button class="btn btn-secondary" id="importFileBtn">📂</button>
         <input type="file" id="fileInput" accept="text/html,.htm,.css,.json,application/javascript,.js" multiple class="hidden">
 
-        <button class="btn btn-warn" id="replaceHtmlBtn">HTML替换</button>
-        <button class="btn btn-warn" id="replaceCssBtn">CSS替换</button>
-        <button class="btn btn-warn" id="replaceJsonBtn">JSON替换</button>
+        <button class="btn btn-warn" id="replaceHtmlBtn">替换</button>
 
-        <button class="btn btn-secondary" id="downloadSelectBtn">下载选择</button>
-        <button class="btn btn-secondary" id="downloadAllBtn">一键全下</button>
-        <button class="btn btn-success" id="mergeExportBtn">合并导出HTML</button>
-        <button class="btn btn-purple" id="splitHtmlBtn">拆分HTML</button>
-        <button class="btn btn-danger" id="cleanCommentBtn">清理AI注释</button>
+        <button class="btn btn-secondary" id="downloadSelectBtn">下载</button>
+        <button class="btn btn-success" id="mergeExportBtn">导出</button>
+        <button class="btn btn-purple" id="splitHtmlBtn">拆分</button>
 
-        <button class="btn btn-toggle" id="draftToggle">自动草稿：关</button>
-        <button class="btn" id="fullscreenBtn">预览全屏</button>
-        <button class="btn btn-secondary" id="configFeishu">飞书配置</button>
-        <button class="btn btn-secondary" id="configGithub">GitHub配置</button>
-        <button class="btn btn-secondary" id="formatCode">格式化代码</button>
-        <button class="btn btn-secondary" id="undoBtn" title="撤销">撤销</button>
-        <button class="btn btn-secondary" id="redoBtn" title="重做">重做</button>
-        <button class="btn btn-secondary" id="fontSizeToggle" title="字体大小">字号</button>
-        <button class="btn btn-danger" id="clearAllBtn">一键清空</button>
+        <button class="btn btn-secondary" id="undoBtn">↩️</button>
+        <button class="btn btn-secondary" id="redoBtn">↪️</button>
+
+        <button class="btn btn-toggle" id="draftToggle">草稿</button>
+        <button class="btn" id="fullscreenBtn">全屏</button>
+
+        <button class="mobile-more-btn" id="moreActionsBtn">•••</button>
+        <div class="toolbar-actions" id="moreActionsMenu" style="display:none;">
+            <button class="btn btn-secondary" id="saveAsProject">另存</button>
+            <button class="btn btn-secondary" id="replaceCssBtn">CSS替换</button>
+            <button class="btn btn-secondary" id="replaceJsonBtn">JSON替换</button>
+            <button class="btn btn-secondary" id="downloadAllBtn">一键全下</button>
+            <button class="btn btn-danger" id="cleanCommentBtn">清注释</button>
+            <button class="btn btn-secondary" id="formatCode">格式化</button>
+            <button class="btn btn-secondary" id="fontSizeToggle">字号</button>
+            <button class="btn btn-secondary" id="configFeishu">飞书</button>
+            <button class="btn btn-secondary" id="configGithub">GitHub</button>
+            <button class="btn btn-danger" id="clearAllBtn">清空</button>
+        </div>
     </div>
     <div class="search-bar hidden" id="searchBar">
         <input type="text" id="searchInput" placeholder="搜索...">
@@ -444,11 +578,13 @@
             <div class="editor-tabs">
                 <div class="tab active" data-tab="html">HTML</div>
                 <div class="tab" data-tab="css">CSS</div>
+                <div class="tab" data-tab="js">JavaScript</div>
                 <div class="tab" data-tab="json">JSON</div>
             </div>
             <div class="editor-content">
                 <textarea id="htmlEditor" placeholder="编写HTML结构..."></textarea>
                 <textarea id="cssEditor" class="hidden" placeholder="编写CSS样式..."></textarea>
+                <textarea id="jsEditor" class="hidden" placeholder="编写JavaScript代码..."></textarea>
                 <textarea id="jsonEditor" class="hidden" placeholder="编写JSON配置..."></textarea>
             </div>
         </div>
@@ -509,12 +645,13 @@
         let searchHighlightTimeout = null;
         let currentSearchIndex = -1;
         let searchMatches = [];
-        let undoStack = {html: [], css: [], json: []};
-        let redoStack = {html: [], css: [], json: []};
+        let undoStack = {html: [], css: [], js: [], json: []};
+        let redoStack = {html: [], css: [], js: [], json: []};
         const MAX_UNDO = 50;
 
         const htmlEditor = document.getElementById('htmlEditor');
         const cssEditor = document.getElementById('cssEditor');
+        const jsEditor = document.getElementById('jsEditor');
         const jsonEditor = document.getElementById('jsonEditor');
         const previewFrame = document.getElementById('previewFrame');
         const tabs = document.querySelectorAll('.tab');
@@ -538,6 +675,7 @@
         function openSaveModal(){
             document.getElementById('projectNameInput').value = '';
             saveDialog.showModal();
+            document.getElementById('projectNameInput').focus();
         }
         function closeSaveModal(){
             saveDialog.close();
@@ -547,6 +685,9 @@
         document.getElementById('saveAsProject').onclick = openSaveModal;
         document.getElementById('cancelSave').onclick = closeSaveModal;
         document.getElementById('confirmSave').onclick = confirmSaveProject;
+        document.getElementById('projectNameInput').addEventListener('keydown', e => {
+            if(e.key === 'Enter') confirmSaveProject();
+        });
 
         fullscreenBtn.onclick = function(){
             isPreviewFull = !isPreviewFull;
@@ -585,6 +726,7 @@
         function getCurrentEditor(){
             if(currentTab==='html') return htmlEditor;
             if(currentTab==='css') return cssEditor;
+            if(currentTab==='js') return jsEditor;
             if(currentTab==='json') return jsonEditor;
             return htmlEditor;
         }
@@ -623,7 +765,7 @@
         function setFontSize(size){
             fontSize = size;
             localStorage.setItem('editorFontSize', size);
-            [htmlEditor, cssEditor, jsonEditor].forEach(e => e.style.fontSize = size + 'px');
+            [htmlEditor, cssEditor, jsEditor, jsonEditor].forEach(e => e.style.fontSize = size + 'px');
         }
         setFontSize(fontSize);
 
@@ -813,7 +955,7 @@
         }
 
         let selectMode = false;
-        let selectedFiles = {html: true, css: true, json: true};
+        let selectedFiles = {html: true, css: true, js: true, json: true};
 
         downloadSelectBtn.onclick = () => {
             if(selectMode){ downloadSelected(); return; }
@@ -839,6 +981,12 @@
                     </label>
                 </div>
                 <div class="form-group">
+                    <label class="select-item ${jsEditor.value.trim() ? '' : 'disabled'}" onclick="toggleSelect('js')">
+                        <input type="checkbox" id="selJs" ${selectedFiles.js ? 'checked' : ''} ${!jsEditor.value.trim() ? 'disabled' : ''}>
+                        JavaScript ${jsEditor.value.trim() ? '' : '(空)'}
+                    </label>
+                </div>
+                <div class="form-group">
                     <label class="select-item ${jsonEditor.value.trim() ? '' : 'disabled'}" onclick="toggleSelect('json')">
                         <input type="checkbox" id="selJson" ${selectedFiles.json ? 'checked' : ''} ${!jsonEditor.value.trim() ? 'disabled' : ''}>
                         JSON ${jsonEditor.value.trim() ? '' : '(空)'}
@@ -855,6 +1003,7 @@
             document.getElementById('confirmSelect').onclick = () => {
                 selectedFiles.html = document.getElementById('selHtml').checked;
                 selectedFiles.css = document.getElementById('selCss').checked;
+                selectedFiles.js = document.getElementById('selJs').checked;
                 selectedFiles.json = document.getElementById('selJson').checked;
                 d.close();
                 document.body.removeChild(d);
@@ -872,6 +1021,7 @@
         function downloadSelected(){
             const hasAny = selectedFiles.html && htmlEditor.value.trim() ||
                           selectedFiles.css && cssEditor.value.trim() ||
+                          selectedFiles.js && jsEditor.value.trim() ||
                           selectedFiles.json && jsonEditor.value.trim();
             if(!hasAny){ showToast('没有可下载的内容', 'error'); return; }
             function download(name, content){
@@ -884,6 +1034,7 @@
             }
             if(selectedFiles.html && htmlEditor.value.trim()) download('index.html', htmlEditor.value);
             if(selectedFiles.css && cssEditor.value.trim()) download('style.css', cssEditor.value);
+            if(selectedFiles.js && jsEditor.value.trim()) download('script.js', jsEditor.value);
             if(selectedFiles.json && jsonEditor.value.trim()) download('config.json', jsonEditor.value);
             showToast('下载完成');
         }
@@ -1059,20 +1210,29 @@ ${html}
         function init() {
             tabs.forEach(t=>t.onclick=switchTab);
             [htmlEditor,cssEditor,jsonEditor].forEach(el=>{
+                let isFirstInput = true;
                 el.oninput = ()=>{
+                    if(isFirstInput){
+                        pushUndo();
+                        isFirstInput = false;
+                    }
                     updatePreview();
                     updateCursorPosition();
                     if(autoDraftOn) autoSaveDraft();
                 };
                 el.onclick = ()=> updateCursorPosition();
-                el.onkeyup = ()=> updateCursorPosition();
+                el.onkeyup = ()=> {
+                    updateCursorPosition();
+                    isFirstInput = true;
+                };
                 el.onkeydown = e => {
-                    if(e.ctrlKey && e.key === 'z'){ e.preventDefault(); undo(); }
-                    if(e.ctrlKey && e.key === 'y'){ e.preventDefault(); redo(); }
+                    if(e.ctrlKey && e.key === 'z'){ e.preventDefault(); undo(); isFirstInput = true; }
+                    if(e.ctrlKey && e.key === 'y'){ e.preventDefault(); redo(); isFirstInput = true; }
                     if(e.ctrlKey && e.key === 's'){ e.preventDefault(); currentProjectId ? confirmSaveProject() : openSaveModal(); }
                     if(e.ctrlKey && e.key === 'f'){ e.preventDefault(); searchBar.classList.toggle('hidden'); if(!searchBar.classList.contains('hidden')) searchInput.focus(); }
                     if(e.key === 'Tab'){
                         e.preventDefault();
+                        pushUndo();
                         const start = el.selectionStart;
                         const end = el.selectionEnd;
                         el.value = el.value.substring(0, start) + '  ' + el.value.substring(end);
@@ -1093,6 +1253,32 @@ ${html}
             document.getElementById('toggleSidebar').onclick = ()=>{
                 projectSidebar.classList.toggle('sidebar-show');
             };
+
+            const moreActionsBtn = document.getElementById('moreActionsBtn');
+            const moreActionsMenu = document.getElementById('moreActionsMenu');
+            moreActionsBtn.onclick = (e) => {
+                e.stopPropagation();
+                moreActionsMenu.style.display = moreActionsMenu.style.display === 'none' ? 'flex' : 'none';
+            };
+            document.addEventListener('click', (e) => {
+                if(!e.target.closest('#moreActionsMenu') && !e.target.closest('#moreActionsBtn')){
+                    moreActionsMenu.style.display = 'none';
+                }
+            });
+            moreActionsMenu.addEventListener('click', (e) => {
+                if(e.target.tagName !== 'BUTTON') return;
+                moreActionsMenu.style.display = 'none';
+            });
+
+            function detectMobile(){
+                return window.innerWidth < 768;
+            }
+            function updateMobileUI(){
+                const isMobile = detectMobile();
+                moreActionsBtn.style.display = isMobile ? 'block' : 'none';
+            }
+            updateMobileUI();
+            window.addEventListener('resize', updateMobileUI);
 
             document.getElementById('newProject').onclick = newProject;
             document.getElementById('refreshProject').onclick = renderProjectList;
@@ -1116,15 +1302,18 @@ ${html}
             e.target.classList.add('active');
             htmlEditor.classList.add('hidden');
             cssEditor.classList.add('hidden');
+            jsEditor.classList.add('hidden');
             jsonEditor.classList.add('hidden');
             if(currentTab==='html')htmlEditor.classList.remove('hidden');
             if(currentTab==='css')cssEditor.classList.remove('hidden');
+            if(currentTab==='js')jsEditor.classList.remove('hidden');
             if(currentTab==='json')jsonEditor.classList.remove('hidden');
         }
 
         function updatePreview(){
             const html = htmlEditor.value;
             const css = cssEditor.value;
+            const js = jsEditor.value;
             let jt = jsonEditor.value.trim();
             let jsonObj = {};
             try{jt=jt?JSON.stringify(JSON.parse(jt)):'{}';jsonObj=jt?JSON.parse(jt):{};}catch(e){jt='{}';}
@@ -1138,6 +1327,7 @@ ${html}
 <body>
 ${html}
 <script>window.previewConfig=${jt};<\/script>
+<script>${js}<\/script>
 </body>
 </html>`;
             const doc = previewFrame.contentDocument;
@@ -1145,7 +1335,7 @@ ${html}
         }
 
         function clearAllContent(){
-            htmlEditor.value='';cssEditor.value='';jsonEditor.value='';
+            htmlEditor.value='';cssEditor.value='';jsEditor.value='';jsonEditor.value='';
             currentProjectId=null;
             if(!autoDraftOn) localStorage.removeItem('previewDraft');
             updatePreview();
@@ -1182,6 +1372,7 @@ ${html}
             currentProjectId = item.id;
             htmlEditor.value=item.html||'';
             cssEditor.value=item.css||'';
+            jsEditor.value=item.js||'';
             jsonEditor.value=item.json||'';
             updatePreview();renderProjectList();
             showToast('已加载');
@@ -1208,7 +1399,7 @@ ${html}
             const name = document.getElementById('projectNameInput').value.trim();
             if(!name)return showToast('请输入项目名','error');
             const data = {
-                name,html:htmlEditor.value,css:cssEditor.value,json:jsonEditor.value,
+                name,html:htmlEditor.value,css:cssEditor.value,js:jsEditor.value,json:jsonEditor.value,
                 createTime:Date.now()
             };
             if(currentProjectId){
@@ -1224,7 +1415,7 @@ ${html}
         }
 
         function autoSaveDraft(){
-            const d = {html:htmlEditor.value,css:cssEditor.value,json:jsonEditor.value};
+            const d = {html:htmlEditor.value,css:cssEditor.value,js:jsEditor.value,json:jsonEditor.value};
             localStorage.setItem('previewDraft',JSON.stringify(d));
             showAutoSaveIndicator();
         }
@@ -1234,6 +1425,7 @@ ${html}
             const d = JSON.parse(s);
             htmlEditor.value = d.html||'';
             cssEditor.value = d.css||'';
+            jsEditor.value = d.js||'';
             jsonEditor.value = d.json||'';
             updatePreview();
         }
@@ -1249,7 +1441,7 @@ ${html}
                     if(ext==='html'||ext==='htm'){htmlEditor.value=txt;switchTabByKey('html');}
                     if(ext==='css'){cssEditor.value=txt;switchTabByKey('css');}
                     if(ext==='json'){jsonEditor.value=txt;switchTabByKey('json');}
-                    if(ext==='js'){htmlEditor.value += "\n<script>\n" + txt + "\n<\/script>\n";switchTabByKey('html');}
+                    if(ext==='js'){jsEditor.value=txt;switchTabByKey('js');}
                     updatePreview();
                     if(autoDraftOn) autoSaveDraft();
                 };
@@ -1276,6 +1468,7 @@ ${html}
             }
             if(htmlEditor.value.trim()) download('index.html',htmlEditor.value);
             if(cssEditor.value.trim()) download('style.css',cssEditor.value);
+            if(jsEditor.value.trim()) download('script.js',jsEditor.value);
             if(jsonEditor.value.trim()) download('config.json',jsonEditor.value);
             showToast('一键下载完成');
         }
@@ -1283,6 +1476,7 @@ ${html}
         function mergeExportHtml(){
             const html = htmlEditor.value;
             const css = cssEditor.value.trim();
+            const js = jsEditor.value.trim();
             const jsonTxt = jsonEditor.value.trim();
             let styleBlock = css ? `<style>\n${css}\n</style>\n` : '';
             let jsonBlock = '';
@@ -1294,6 +1488,7 @@ ${html}
                     return showToast('JSON格式错误','error');
                 }
             }
+            let jsBlock = js ? `<script>\n${js}\n<\/script>\n` : '';
             const merged = `<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -1304,6 +1499,7 @@ ${styleBlock}
 <body>
 ${html}
 ${jsonBlock}
+${jsBlock}
 </body>
 </html>`;
             const blob = new Blob([merged],{type:'text/html'});
@@ -1318,25 +1514,49 @@ ${jsonBlock}
         function splitHtmlToThree(){
             let full = htmlEditor.value;
             let cssContent = '';
+            let jsContent = '';
             let jsonContent = '';
-            const styleReg = /<style[\s\S]*?>([\s\S]*?)<\/style>/gi;
+            
+            const styleReg = /<style\s*[^>]*>([\s\S]*?)<\/style>/gi;
             const styleMatch = full.match(styleReg);
             if(styleMatch){
-                cssContent = styleMatch.map(item=>item.replace(/<style[\s\S]*?>|<\/style>/gi,'').trim()).join('\n\n');
-                full = full.replace(styleReg,'').trim();
+                cssContent = styleMatch.map(item => {
+                    return item.replace(/<style\s*[^>]*>|<\/style>/gi, '').trim();
+                }).join('\n\n');
+                full = full.replace(styleReg, '').trim();
             }
-            const jsonReg = /window\.previewConfig\s*=\s*(\{[\s\S]*?\});?/gi;
+            
+            const scriptReg = /<script\s*[^>]*>([\s\S]*?)<\/script>/gi;
+            const scriptMatches = [];
+            let scriptMatch;
+            const scriptCopy = full;
+            while((scriptMatch = scriptReg.exec(scriptCopy)) !== null){
+                scriptMatches.push(scriptMatch[1]);
+            }
+            
+            const jsonReg = /(?:window\.)?(previewConfig|previewJson)\s*=\s*(\{[\s\S]*?\});?/gi;
             const jsonMatch = full.match(jsonReg);
             if(jsonMatch){
-                let jsonStr = jsonMatch[0].replace(/window\.previewConfig\s*=|;$/g,'').trim();
+                let jsonStr = jsonMatch[0].replace(/(?:window\.)?(previewConfig|previewJson)\s*=|;$/g, '').trim();
                 try{
-                    jsonContent = JSON.stringify(JSON.parse(jsonStr),null,2);
+                    jsonContent = JSON.stringify(JSON.parse(jsonStr), null, 2);
                 }catch(e){}
-                full = full.replace(jsonReg,'').trim();
+                full = full.replace(jsonReg, '').trim();
             }
-            htmlEditor.value = full;
-            cssEditor.value = cssContent;
-            jsonEditor.value = jsonContent;
+            
+            full = full.replace(/<script\s*[^>]*>[\s\S]*?<\/script>/gi, '').trim();
+            
+            const remainingScripts = scriptMatches.filter(s => {
+                return !s.includes('previewConfig') && !s.includes('previewJson');
+            });
+            if(remainingScripts.length > 0){
+                jsContent = remainingScripts.join('\n\n');
+            }
+            
+            htmlEditor.value = full || '';
+            cssEditor.value = cssContent || '';
+            jsEditor.value = jsContent || '';
+            jsonEditor.value = jsonContent || '';
             if(autoDraftOn) autoSaveDraft();
             switchTabByKey('html');
             updatePreview();
@@ -1346,6 +1566,10 @@ ${jsonBlock}
         function cleanAllComment(){
             htmlEditor.value = htmlEditor.value.replace(/<!--[\s\S]*?-->/g,'').replace(/\n\s*\n/g,'\n').trim();
             cssEditor.value = cssEditor.value.replace(/\/\*[\s\S]*?\*\//g,'').replace(/\n\s*\n/g,'\n').trim();
+            jsEditor.value = jsEditor.value
+                .replace(/\/\*[\s\S]*?\*\//g,'')
+                .replace(/\/\/[^\n]*/g,'')
+                .replace(/\n\s*\n/g,'\n').trim();
             jsonEditor.value = jsonEditor.value
                 .replace(/\/\*[\s\S]*?\*\//g,'')
                 .replace(/\/\/[^\n]*/g,'')
