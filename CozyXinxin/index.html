@@ -114,7 +114,7 @@
                 z-index: 100;
                 display: none !important;
             }
-            .toolbar-actions.show {
+            .toolbar-actions.mobile-show {
                 display: flex !important;
             }
             .editor-tabs {
@@ -541,19 +541,20 @@
         <button class="btn btn-toggle" id="draftToggle">草稿</button>
         <button class="btn" id="fullscreenBtn">全屏</button>
 
-        <button class="mobile-more-btn" id="moreActionsBtn">•••</button>
-        <div class="toolbar-actions" id="moreActionsMenu" style="display:none;">
-            <button class="btn btn-secondary" id="saveAsProject">另存</button>
+        <div class="toolbar-actions">
+            <button class="btn btn-secondary" id="saveAsProject">另存为</button>
             <button class="btn btn-secondary" id="replaceCssBtn">CSS替换</button>
             <button class="btn btn-secondary" id="replaceJsonBtn">JSON替换</button>
             <button class="btn btn-secondary" id="downloadAllBtn">一键全下</button>
-            <button class="btn btn-danger" id="cleanCommentBtn">清注释</button>
-            <button class="btn btn-secondary" id="formatCode">格式化</button>
+            <button class="btn btn-danger" id="cleanCommentBtn">清理注释</button>
+            <button class="btn btn-secondary" id="formatCode">格式化代码</button>
             <button class="btn btn-secondary" id="fontSizeToggle">字号</button>
-            <button class="btn btn-secondary" id="configFeishu">飞书</button>
-            <button class="btn btn-secondary" id="configGithub">GitHub</button>
-            <button class="btn btn-danger" id="clearAllBtn">清空</button>
+            <button class="btn btn-secondary" id="configFeishu">飞书配置</button>
+            <button class="btn btn-secondary" id="configGithub">GitHub配置</button>
+            <button class="btn btn-danger" id="clearAllBtn">一键清空</button>
         </div>
+
+        <button class="mobile-more-btn" id="moreActionsBtn">•••</button>
     </div>
     <div class="search-bar hidden" id="searchBar">
         <input type="text" id="searchInput" placeholder="搜索...">
@@ -1255,30 +1256,26 @@ ${html}
             };
 
             const moreActionsBtn = document.getElementById('moreActionsBtn');
-            const moreActionsMenu = document.getElementById('moreActionsMenu');
+            const toolbarActions = document.querySelector('.toolbar-actions');
             moreActionsBtn.onclick = (e) => {
                 e.stopPropagation();
-                moreActionsMenu.style.display = moreActionsMenu.style.display === 'none' ? 'flex' : 'none';
+                toolbarActions.classList.toggle('mobile-show');
             };
             document.addEventListener('click', (e) => {
-                if(!e.target.closest('#moreActionsMenu') && !e.target.closest('#moreActionsBtn')){
-                    moreActionsMenu.style.display = 'none';
+                if(!e.target.closest('.toolbar-actions') && !e.target.closest('#moreActionsBtn')){
+                    toolbarActions.classList.remove('mobile-show');
                 }
             });
-            moreActionsMenu.addEventListener('click', (e) => {
-                if(e.target.tagName !== 'BUTTON') return;
-                moreActionsMenu.style.display = 'none';
-            });
 
-            function detectMobile(){
-                return window.innerWidth < 768;
-            }
-            function updateMobileUI(){
-                const isMobile = detectMobile();
-                moreActionsBtn.style.display = isMobile ? 'block' : 'none';
-            }
-            updateMobileUI();
-            window.addEventListener('resize', updateMobileUI);
+            document.addEventListener('DOMContentLoaded', () => {
+                function updateMobileUI(){
+                    const isMobile = window.innerWidth < 768;
+                    moreActionsBtn.style.display = isMobile ? 'block' : 'none';
+                    toolbarActions.classList.remove('mobile-show');
+                }
+                updateMobileUI();
+                window.addEventListener('resize', updateMobileUI);
+            });
 
             document.getElementById('newProject').onclick = newProject;
             document.getElementById('refreshProject').onclick = renderProjectList;
