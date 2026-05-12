@@ -359,9 +359,6 @@
         .editor-panel.hidden {
             display: none;
         }
-        .editor-hidden .preview-panel {
-            width: 100%;
-        }
         .editor-tabs {
             display: flex;
             background: rgba(20, 20, 40, 0.8);
@@ -442,20 +439,6 @@
             align-items: center;
             flex-shrink: 0;
             border-radius: 0 0 8px 0;
-            justify-content: space-between;
-        }
-        .toggle-editor-btn {
-            background: rgba(255, 255, 255, 0.1);
-            border: none;
-            color: #fff;
-            padding: 6px 10px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 14px;
-            transition: all 0.2s ease;
-        }
-        .toggle-editor-btn:hover {
-            background: rgba(255, 255, 255, 0.15);
         }
         .iframe-wrap {
             flex: 1;
@@ -705,12 +688,12 @@
     </div>
     <div class="search-bar hidden" id="searchBar">
         <input type="text" id="searchInput" placeholder="搜索...">
+        <button class="mini-btn" id="doSearchPrev">↑</button>
+        <button class="mini-btn" id="doSearchNext">↓</button>
         <input type="text" id="replaceInput" placeholder="替换为...">
-        <button class="mini-btn" id="doSearchPrev">上一个</button>
-        <button class="mini-btn" id="doSearchNext">下一个</button>
         <button class="mini-btn" id="doReplace">替换</button>
-        <button class="mini-btn" id="doReplaceAll">替换全部</button>
-        <button class="mini-btn" id="closeSearch">关闭</button>
+        <button class="mini-btn" id="doReplaceAll">全部</button>
+        <button class="mini-btn" id="closeSearch">×</button>
     </div>
 
     <div class="main-wrap">
@@ -744,7 +727,6 @@
                     <button class="mini-btn" id="refreshPreview">刷新预览</button>
                     <button class="mini-btn" id="fullscreenBtn">全屏</button>
                 </div>
-                <button class="toggle-editor-btn" id="toggleEditorBtn" title="收起/展开编辑器">≡</button>
             </div>
             <div class="iframe-wrap">
                 <iframe id="previewFrame"></iframe>
@@ -1463,19 +1445,8 @@ ${html}
             document.getElementById('clearAllBtn').onclick = clearAllContent;
             document.getElementById('refreshPreview').onclick = updatePreview;
 
-            const toggleEditorBtn = document.getElementById('toggleEditorBtn');
             const mainWrap = document.querySelector('.main-wrap');
             const editorPanel = document.querySelector('.editor-panel');
-            toggleEditorBtn.onclick = () => {
-                mainWrap.classList.toggle('editor-hidden');
-                if(mainWrap.classList.contains('editor-hidden')){
-                    toggleEditorBtn.textContent = '☰';
-                    toggleEditorBtn.title = '展开编辑器';
-                } else {
-                    toggleEditorBtn.textContent = '≡';
-                    toggleEditorBtn.title = '收起编辑器';
-                }
-            };
 
             document.getElementById('importFileBtn').onclick=()=>document.getElementById('fileInput').click();
             document.getElementById('fileInput').onchange=handleImportFile;
