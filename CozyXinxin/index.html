@@ -204,11 +204,15 @@
         .search-bar {
             padding: 6px 8px;
             gap: 4px;
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
         }
         .search-bar input {
-            min-width: 80px;
-            font-size: 14px;
-            padding: 6px 8px;
+            min-width: 60px;
+            font-size: 13px;
+            padding: 5px 6px;
+            flex-shrink: 0;
         }
         .preview-header {
             padding: 6px 10px;
