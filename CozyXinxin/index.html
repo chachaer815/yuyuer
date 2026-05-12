@@ -135,7 +135,9 @@
             background: rgba(255, 255, 255, 0.15);
         }
         .toolbar-actions {
-            display: none;
+            display: flex;
+            gap: 4px;
+            flex-shrink: 0;
         }
 
         @media (max-width: 768px) {
@@ -188,24 +190,6 @@
             }
             .toolbar-actions-overlay.show {
                 display: block;
-            }
-        }
-
-        @media (min-width: 769px) {
-            .toolbar-actions {
-                position: relative;
-                bottom: auto;
-                left: auto;
-                right: auto;
-                display: flex !important;
-                transform: none;
-                background: transparent;
-                border: none;
-                padding: 0;
-                box-shadow: none;
-                max-height: none;
-                overflow: visible;
-                flex-wrap: nowrap;
             }
         }
 
@@ -270,6 +254,8 @@
             .btn span { display: none; }
             .tab {
                 padding: 6px 10px;
+                font-size: 12px;
+                color: #ccc;
             }
         }
 
@@ -393,7 +379,7 @@
             flex-shrink: 0;
             border-radius: 6px;
             transition: all 0.2s ease;
-            color: #888;
+            color: #bbb;
         }
         .tab:hover {
             background: rgba(255, 255, 255, 0.08);
@@ -704,9 +690,7 @@
         <button class="btn btn-secondary" id="saveProject">💾</button>
 
         <button class="btn btn-warn" id="importFileBtn">📂 上传</button>
-        <input type="file" id="fileInput" accept="text/html,.htm,.css,.json,application/javascript,.js" multiple class="hidden">
-
-        <button class="btn btn-warn" id="replaceHtmlBtn">替换</button>
+        <input type="file" id="fileInput" accept=".html,.htm,.css,.js,.json" multiple class="hidden">
 
         <button class="btn btn-secondary" id="downloadSelectBtn">下载</button>
         <button class="btn btn-success" id="mergeExportBtn">导出</button>
@@ -1039,7 +1023,6 @@
 
         document.getElementById('formatCode').onclick = formatCode;
 
-        document.getElementById('replaceHtmlBtn').onclick = () => openReplaceDialog('html');
         document.getElementById('replaceCssBtn').onclick = () => openReplaceDialog('css');
         document.getElementById('replaceJsonBtn').onclick = () => openReplaceDialog('json');
 
