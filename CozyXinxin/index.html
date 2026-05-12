@@ -2,22 +2,30 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>全能HTML预览工作台</title>
+    <!-- 关键：锁定缩放，完全固定 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>全能HTML预览工作台（固定无变形版）</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
             font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            /* 禁止选中、防止意外拖动变形 */
+            user-select: none;
+            -webkit-user-select: none;
         }
         body {
             background-color: #1e1e1e;
             color: #e0e0e0;
             height: 100vh;
+            width: 100vw;
             display: flex;
             flex-direction: column;
             overflow: hidden;
+            position: fixed;
+            top: 0;
+            left: 0;
         }
         .toolbar {
             padding: 8px 12px;
@@ -27,6 +35,7 @@
             gap: 6px;
             align-items: center;
             flex-wrap: wrap;
+            flex-shrink: 0; /* 固定高度，不压缩 */
         }
         .btn {
             padding: 6px 10px;
@@ -38,6 +47,7 @@
             cursor: pointer;
             transition: background 0.2s;
             white-space: nowrap;
+            flex-shrink: 0;
         }
         .btn:hover { background: #1177bb; }
         .btn-secondary { background: #3c3c3c; }
@@ -53,6 +63,8 @@
             flex: 1;
             display: flex;
             overflow: hidden;
+            width: 100%;
+            height: 100%;
         }
         .project-sidebar {
             width: 0;
@@ -62,6 +74,7 @@
             display: flex;
             flex-direction: column;
             transition: width 0.3s;
+            flex-shrink: 0;
         }
         .sidebar-show {
             width: 240px;
@@ -74,6 +87,7 @@
             border-bottom: 1px solid #3c3c3c;
             display: flex;
             justify-content: space-between;
+            flex-shrink: 0;
         }
         .project-list {
             flex: 1;
@@ -107,6 +121,7 @@
             background: #444;
             cursor: pointer;
             white-space: nowrap;
+            flex-shrink: 0;
         }
         .mini-btn:hover { background: #555; }
 
@@ -116,6 +131,8 @@
             flex-direction: column;
             border-right: 1px solid #3c3c3c;
             transition: all 0.3s ease;
+            min-width: 0;
+            height: 100%;
         }
         .editor-panel.hide-left {
             flex: 0 0 0;
@@ -127,12 +144,14 @@
             display: flex;
             background: #252526;
             border-bottom: 1px solid #3c3c3c;
+            flex-shrink: 0;
         }
         .tab {
             padding: 9px 18px;
             cursor: pointer;
             border-bottom: 2px solid transparent;
             font-size: 13px;
+            flex-shrink: 0;
         }
         .tab.active {
             border-bottom-color: #0e639c;
@@ -142,6 +161,7 @@
             flex: 1;
             display: flex;
             flex-direction: column;
+            overflow: hidden;
         }
         textarea {
             flex: 1;
@@ -151,25 +171,30 @@
             border: none;
             padding: 14px;
             font-family: Consolas, 'Courier New', monospace;
-            font-size: 14px;
+            font-size: 16px !important; /* 关键：≥16px 防止iOS放大 */
             resize: none;
             outline: none;
+            overflow-y: auto;
         }
         .preview-panel {
             flex: 1;
             display: flex;
             flex-direction: column;
             overflow: hidden;
+            min-width: 0;
+            height: 100%;
         }
         .preview-header {
             padding: 8px 16px;
             background: #252526;
             border-bottom: 1px solid #3c3c3c;
             font-size: 13px;
-            color: #999;
+            color: #ffffff;
+            font-weight: 500;
             display: flex;
             gap: 10px;
             align-items: center;
+            flex-shrink: 0;
         }
         .iframe-wrap {
             flex: 1;
@@ -181,32 +206,20 @@
             border: none;
             background: #fff;
         }
-        .modal {
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.7);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 9999;
-            opacity: 0;
-            visibility: hidden;
-            transition: 0.3s;
-        }
-        .modal.show {
-            opacity: 1;
-            visibility: visible;
-        }
-        .modal-box {
-            width: 90%;
-            max-width: 480px;
+
+        dialog {
             background: #252526;
+            color: #e0e0e0;
+            border: 1px solid #3c3c3c;
             border-radius: 6px;
             padding: 20px;
-            border: 1px solid #3c3c3c;
-            z-index: 10000;
+            width: 90%;
+            max-width: 480px;
         }
-        .modal-box h3 {
+        dialog::backdrop {
+            background: rgba(0,0,0,0.7);
+        }
+        dialog h3 {
             margin-bottom: 16px;
             color: #fff;
             font-size: 16px;
@@ -220,14 +233,14 @@
             font-size: 13px;
             color: #ccc;
         }
-        .form-group input, .form-group textarea {
+        .form-group input {
             width: 100%;
             padding: 9px;
             background: #1e1e1e;
             border: 1px solid #3c3c3c;
             border-radius: 4px;
             color: #e0e0e0;
-            font-size: 13px;
+            font-size: 16px !important; /* 关键：≥16px */
             outline: none;
         }
         .modal-actions {
@@ -236,6 +249,7 @@
             gap: 8px;
             margin-top: 20px;
         }
+
         .toast {
             position: fixed;
             bottom: 20px;
@@ -263,6 +277,118 @@
             align-items: center;
             margin: 8px 0;
         }
+        .search-bar {
+            padding: 8px 12px;
+            background: #2d2d2d;
+            border-bottom: 1px solid #3c3c3c;
+            display: flex;
+            gap: 6px;
+            align-items: center;
+            flex-wrap: wrap;
+            flex-shrink: 0;
+        }
+        .search-bar input {
+            padding: 5px 8px;
+            background: #1e1e1e;
+            border: 1px solid #3c3c3c;
+            border-radius: 3px;
+            color: #e0e0e0;
+            font-size: 13px;
+            outline: none;
+            min-width: 120px;
+        }
+        .search-bar input:focus { border-color: #0e639c; }
+        .search-highlight { background: #f5a623; color: #000; border-radius: 2px; }
+        .search-highlight.current { background: #e67e22; }
+        .select-item {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            padding: 6px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+        }
+        .select-item:hover { background: #383838; }
+        .select-item.selected { background: #0e639c; }
+        .char-count {
+            font-size: 11px;
+            color: #999;
+            padding: 2px 8px;
+            background: #1e1e1e;
+            border-radius: 10px;
+        }
+        .font-size-modal {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            min-width: 280px;
+        }
+        .font-size-preview {
+            padding: 10px;
+            background: #1e1e1e;
+            border-radius: 4px;
+            text-align: center;
+        }
+        .font-size-slider {
+            width: 100%;
+            accent-color: #0e639c;
+        }
+        .config-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #3c3c3c;
+        }
+        .config-item:last-child { border-bottom: none; }
+        .config-label { font-size: 13px; color: #ccc; }
+        .config-value { font-size: 12px; color: #999; max-width: 200px; word-break: break-all; }
+        .feishu-token-input { width: 100%; margin-top: 6px; }
+        .tab-count {
+            font-size: 11px;
+            background: #444;
+            padding: 2px 6px;
+            border-radius: 8px;
+            margin-left: 4px;
+        }
+        .tab.has-content .tab-count { background: #0e639c; }
+        .status-bar {
+            padding: 4px 12px;
+            background: #252526;
+            border-top: 1px solid #3c3c3c;
+            font-size: 11px;
+            color: #999;
+            display: flex;
+            gap: 16px;
+            flex-shrink: 0;
+        }
+        .status-item { display: flex; gap: 4px; }
+        .status-item span { color: #ccc; }
+        .auto-save-indicator { color: #28a745; display: none; }
+        .auto-save-indicator.show { display: inline; }
+        .shortcuts-hint {
+            position: fixed;
+            bottom: 40px;
+            right: 10px;
+            background: #2d2d2d;
+            border: 1px solid #3c3c3c;
+            border-radius: 6px;
+            padding: 10px 14px;
+            font-size: 12px;
+            color: #ccc;
+            z-index: 1000;
+            display: none;
+            max-width: 280px;
+        }
+        .shortcuts-hint.show { display: block; }
+        .shortcuts-hint h4 { margin-bottom: 8px; color: #fff; }
+        .shortcuts-hint kbd {
+            background: #444;
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-size: 11px;
+        }
     </style>
 </head>
 <body>
@@ -273,7 +399,7 @@
         <button class="btn btn-secondary" id="saveAsProject">另存为</button>
 
         <button class="btn btn-secondary" id="importFileBtn">导入文件</button>
-        <input type="file" id="fileInput" accept=".html,.htm,.css,.json" multiple class="hidden">
+        <input type="file" id="fileInput" accept="text/html,.htm,.css,.json,application/javascript,.js" multiple class="hidden">
 
         <button class="btn btn-warn" id="replaceHtmlBtn">HTML替换</button>
         <button class="btn btn-warn" id="replaceCssBtn">CSS替换</button>
@@ -286,11 +412,23 @@
         <button class="btn btn-danger" id="cleanCommentBtn">清理AI注释</button>
 
         <button class="btn btn-toggle" id="draftToggle">自动草稿：关</button>
-
         <button class="btn" id="fullscreenBtn">预览全屏</button>
         <button class="btn btn-secondary" id="configFeishu">飞书配置</button>
         <button class="btn btn-secondary" id="configGithub">GitHub配置</button>
+        <button class="btn btn-secondary" id="formatCode">格式化代码</button>
+        <button class="btn btn-secondary" id="undoBtn" title="撤销">撤销</button>
+        <button class="btn btn-secondary" id="redoBtn" title="重做">重做</button>
+        <button class="btn btn-secondary" id="fontSizeToggle" title="字体大小">字号</button>
         <button class="btn btn-danger" id="clearAllBtn">一键清空</button>
+    </div>
+    <div class="search-bar hidden" id="searchBar">
+        <input type="text" id="searchInput" placeholder="搜索...">
+        <input type="text" id="replaceInput" placeholder="替换为...">
+        <button class="mini-btn" id="doSearchPrev">上一个</button>
+        <button class="mini-btn" id="doSearchNext">下一个</button>
+        <button class="mini-btn" id="doReplace">替换</button>
+        <button class="mini-btn" id="doReplaceAll">替换全部</button>
+        <button class="mini-btn" id="closeSearch">关闭</button>
     </div>
 
     <div class="main-wrap">
@@ -326,125 +464,54 @@
         </div>
     </div>
 
-    <!-- 保存弹窗 -->
-    <div class="modal" id="saveModal">
-        <div class="modal-box">
-            <h3>保存项目</h3>
-            <div class="form-group">
-                <label>项目名称</label>
-                <input type="text" id="projectNameInput" placeholder="输入项目名">
-            </div>
-            <div class="modal-actions">
-                <button class="btn btn-secondary" id="cancelSave">取消</button>
-                <button class="btn" id="confirmSave">确定保存</button>
-            </div>
+    <div class="status-bar" id="statusBar">
+        <div class="status-item">行<span id="cursorLine">1</span>, 列<span id="cursorCol">1</span></div>
+        <div class="status-item">字符<span id="charCount">0</span></div>
+        <div class="status-item auto-save-indicator" id="autoSaveIndicator">已自动保存</div>
+        <div class="status-item" style="margin-left:auto;">
+            <kbd>?</kbd> <span id="shortcutsToggle" style="cursor:pointer;color:#0e639c;">快捷键</span>
         </div>
     </div>
 
-    <!-- GitHub推送弹窗 -->
-    <div class="modal" id="githubPushModal">
-        <div class="modal-box">
-            <h3>推送到GitHub</h3>
-            <div class="checkbox-row">
-                <label><input type="checkbox" id="pushHtml" checked disabled> 推送HTML</label>
-            </div>
-            <div class="checkbox-row">
-                <label><input type="checkbox" id="pushCss"> 推送CSS</label>
-            </div>
-            <div class="checkbox-row">
-                <label><input type="checkbox" id="pushJson"> 推送JSON</label>
-            </div>
-            <div class="form-group">
-                <label>提交备注</label>
-                <input type="text" id="commitMsg" value="更新项目代码">
-            </div>
-            <div class="modal-actions">
-                <button class="btn btn-secondary" id="cancelGithubPush">取消</button>
-                <button class="btn btn-success" id="confirmGithubPush">确认推送</button>
-            </div>
-        </div>
+    <div class="shortcuts-hint" id="shortcutsHint">
+        <h4>键盘快捷键</h4>
+        <div><kbd>Ctrl+Z</kbd> 撤销</div>
+        <div><kbd>Ctrl+Y</kbd> 重做</div>
+        <div><kbd>Ctrl+S</kbd> 保存</div>
+        <div><kbd>Ctrl+F</kbd> 搜索</div>
+        <div><kbd>Tab</kbd> 缩进</div>
+        <div><kbd>Enter</kbd> 搜索下一个</div>
+        <div><kbd>Shift+Enter</kbd> 搜索上一个</div>
+        <div><kbd>Ctrl+Enter</kbd> 替换</div>
+        <div><kbd>Esc</kbd> 关闭搜索</div>
     </div>
 
-    <!-- 查找替换通用弹窗 -->
-    <div class="modal" id="replaceModal">
-        <div class="modal-box">
-            <h3 id="replaceTitle">查找替换</h3>
-            <div class="form-group">
-                <label>查找内容</label>
-                <input type="text" id="findText">
-            </div>
-            <div class="form-group">
-                <label>替换为</label>
-                <input type="text" id="replaceText">
-            </div>
-            <div class="modal-actions">
-                <button class="btn btn-secondary" id="cancelReplace">取消</button>
-                <button class="btn" id="doReplace">全部替换</button>
-            </div>
+    <dialog id="saveDialog">
+        <h3>保存项目</h3>
+        <div class="form-group">
+            <label>项目名称</label>
+            <input type="text" id="projectNameInput" placeholder="输入项目名">
         </div>
-    </div>
-
-    <!-- 下载选择弹窗 -->
-    <div class="modal" id="downloadModal">
-        <div class="modal-box">
-            <h3>选择下载文件</h3>
-            <div class="checkbox-row">
-                <label><input type="checkbox" id="downHtml" checked> 下载HTML</label>
-            </div>
-            <div class="checkbox-row">
-                <label><input type="checkbox" id="downCss"> 下载CSS</label>
-            </div>
-            <div class="checkbox-row">
-                <label><input type="checkbox" id="downJson"> 下载JSON</label>
-            </div>
-            <div class="modal-actions">
-                <button class="btn btn-secondary" id="cancelDownload">取消</button>
-                <button class="btn" id="confirmDownload">确认下载</button>
-            </div>
+        <div class="modal-actions">
+            <button class="btn btn-secondary" id="cancelSave">取消</button>
+            <button class="btn" id="confirmSave">确定保存</button>
         </div>
-    </div>
-
-    <!-- 飞书配置 -->
-    <div class="modal" id="feishuConfigModal">
-        <div class="modal-box">
-            <h3>飞书配置</h3>
-            <div class="form-group"><label>App ID</label><input type="text" id="feishuAppId"></div>
-            <div class="form-group"><label>App Secret</label><input type="text" id="feishuAppSecret"></div>
-            <div class="form-group"><label>表格Token</label><input type="text" id="feishuTableToken"></div>
-            <div class="form-group"><label>表格ID</label><input type="text" id="feishuTableId"></div>
-            <div class="modal-actions">
-                <button class="btn btn-secondary" id="testFeishuBtn">测试连接</button>
-                <button class="btn btn-secondary" id="closeFeishuConfig">关闭</button>
-                <button class="btn" id="saveFeishuConfig">保存配置</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- GitHub配置 -->
-    <div class="modal" id="githubConfigModal">
-        <div class="modal-box">
-            <h3>GitHub配置</h3>
-            <div class="form-group"><label>用户名</label><input type="text" id="githubUsername"></div>
-            <div class="form-group"><label>仓库名</label><input type="text" id="githubRepo"></div>
-            <div class="form-group"><label>分支</label><input type="text" id="githubBranch" value="main"></div>
-            <div class="form-group"><label>Token</label><input type="text" id="githubToken"></div>
-            <div class="modal-actions">
-                <button class="btn btn-secondary" id="closeGithubConfig">关闭</button>
-                <button class="btn" id="saveGithubConfig">保存配置</button>
-            </div>
-        </div>
-    </div>
+    </dialog>
 
     <div class="toast" id="toast"></div>
 
     <script>
         let currentTab = 'html';
         let currentProjectId = null;
-        let feishuConfig = JSON.parse(localStorage.getItem('feishuConfig')) || {};
-        let githubConfig = JSON.parse(localStorage.getItem('githubConfig')) || {};
-        let isPreviewFull = false;
-        let replaceTarget = 'html';
         let autoDraftOn = localStorage.getItem('autoDraftOn') === '1';
+        let isPreviewFull = false;
+        let fontSize = parseInt(localStorage.getItem('editorFontSize')) || 16;
+        let searchHighlightTimeout = null;
+        let currentSearchIndex = -1;
+        let searchMatches = [];
+        let undoStack = {html: [], css: [], json: []};
+        let redoStack = {html: [], css: [], json: []};
+        const MAX_UNDO = 50;
 
         const htmlEditor = document.getElementById('htmlEditor');
         const cssEditor = document.getElementById('cssEditor');
@@ -454,17 +521,43 @@
         const toast = document.getElementById('toast');
         const projectSidebar = document.getElementById('projectSidebar');
         const draftToggle = document.getElementById('draftToggle');
+        const saveDialog = document.getElementById('saveDialog');
+        const fullscreenBtn = document.getElementById('fullscreenBtn');
+        const editorPanel = document.getElementById('editorPanel');
+        const searchBar = document.getElementById('searchBar');
+        const searchInput = document.getElementById('searchInput');
+        const replaceInput = document.getElementById('replaceInput');
+        const downloadSelectBtn = document.getElementById('downloadSelectBtn');
 
         function updateDraftBtnText(){
-            if(autoDraftOn){
-                draftToggle.innerText = "自动草稿：开";
-                draftToggle.classList.add("on");
-            }else{
-                draftToggle.innerText = "自动草稿：关";
-                draftToggle.classList.remove("on");
-            }
+            draftToggle.innerText = autoDraftOn ? "自动草稿：开" : "自动草稿：关";
+            draftToggle.classList.toggle("on", autoDraftOn);
         }
         updateDraftBtnText();
+
+        function openSaveModal(){
+            document.getElementById('projectNameInput').value = '';
+            saveDialog.showModal();
+        }
+        function closeSaveModal(){
+            saveDialog.close();
+        }
+
+        document.getElementById('saveProject').onclick = () => currentProjectId ? confirmSaveProject() : openSaveModal();
+        document.getElementById('saveAsProject').onclick = openSaveModal;
+        document.getElementById('cancelSave').onclick = closeSaveModal;
+        document.getElementById('confirmSave').onclick = confirmSaveProject;
+
+        fullscreenBtn.onclick = function(){
+            isPreviewFull = !isPreviewFull;
+            if(isPreviewFull){
+                editorPanel.classList.add('hide-left');
+                fullscreenBtn.textContent = '退出全屏';
+            }else{
+                editorPanel.classList.remove('hide-left');
+                fullscreenBtn.textContent = '预览全屏';
+            }
+        };
 
         let db;
         function initIndexedDB() {
@@ -484,28 +577,508 @@
         }
         function dbAdd(store,data){return new Promise(res=>{let t=db.transaction(store,'readwrite'),o=t.objectStore(store),r=o.add(data);r.onsuccess=e=>res(e.target.result);});}
         function dbPut(store,data){return new Promise(res=>{let t=db.transaction(store,'readwrite'),o=t.objectStore(store);o.put(data).onsuccess=()=>res();});}
-        function dbDel(store,id){return new Promise(res=>{let t=db.transaction(store,'readwrite'),o=t.objectStore(store);o.delete(id).onsuccess=()=>res();});}
         function dbAll(store){return new Promise(res=>{let t=db.transaction(store,'readonly'),o=t.objectStore(store),arr=[];o.openCursor().onsuccess=e=>{let c=e.target.result;if(c){arr.push(c.value);c.continue();}else res(arr);};});}
 
         initIndexedDB();
         init();
 
+        function getCurrentEditor(){
+            if(currentTab==='html') return htmlEditor;
+            if(currentTab==='css') return cssEditor;
+            if(currentTab==='json') return jsonEditor;
+            return htmlEditor;
+        }
+
+        function pushUndo(){
+            const ed = getCurrentEditor();
+            const key = currentTab;
+            undoStack[key].push(ed.value);
+            if(undoStack[key].length > MAX_UNDO) undoStack[key].shift();
+            redoStack[key] = [];
+        }
+
+        function undo(){
+            const ed = getCurrentEditor();
+            const key = currentTab;
+            if(undoStack[key].length === 0){showToast('没有可撤销的','error');return;}
+            redoStack[key].push(ed.value);
+            ed.value = undoStack[key].pop();
+            updatePreview();
+            if(autoDraftOn) autoSaveDraft();
+        }
+
+        function redo(){
+            const ed = getCurrentEditor();
+            const key = currentTab;
+            if(redoStack[key].length === 0){showToast('没有可重做的','error');return;}
+            undoStack[key].push(ed.value);
+            ed.value = redoStack[key].pop();
+            updatePreview();
+            if(autoDraftOn) autoSaveDraft();
+        }
+
+        document.getElementById('undoBtn').onclick = undo;
+        document.getElementById('redoBtn').onclick = redo;
+
+        function setFontSize(size){
+            fontSize = size;
+            localStorage.setItem('editorFontSize', size);
+            [htmlEditor, cssEditor, jsonEditor].forEach(e => e.style.fontSize = size + 'px');
+        }
+        setFontSize(fontSize);
+
+        document.getElementById('fontSizeToggle').onclick = () => {
+            const sizes = [14, 16, 18, 20, 22, 24];
+            const idx = sizes.indexOf(fontSize);
+            const next = sizes[(idx + 1) % sizes.length];
+            setFontSize(next);
+            showToast(`字号: ${next}px`);
+        };
+
+        document.getElementById('shortcutsToggle').onclick = () => {
+            document.getElementById('shortcutsHint').classList.toggle('show');
+        };
+        document.addEventListener('click', e => {
+            if(!e.target.closest('#shortcutsHint') && !e.target.closest('#shortcutsToggle')){
+                document.getElementById('shortcutsHint').classList.remove('show');
+            }
+        });
+
+        function updateCursorPosition(){
+            const ed = getCurrentEditor();
+            const pos = ed.selectionStart;
+            const text = ed.value.substring(0, pos);
+            const lines = text.split('\n');
+            const line = lines.length;
+            const col = lines[lines.length - 1].length + 1;
+            document.getElementById('cursorLine').textContent = line;
+            document.getElementById('cursorCol').textContent = col;
+            document.getElementById('charCount').textContent = ed.value.length;
+        }
+
+        function showAutoSaveIndicator(){
+            const indicator = document.getElementById('autoSaveIndicator');
+            indicator.classList.add('show');
+            setTimeout(() => indicator.classList.remove('show'), 2000);
+        }
+
+        function formatCode(){
+            const ed = getCurrentEditor();
+            pushUndo();
+            if(currentTab === 'html'){
+                let html = ed.value;
+                html = html.replace(/></g, '>\n<');
+                const tags = [];
+                let formatted = '';
+                let indent = 0;
+                const parts = html.split(/(?=<)/);
+                for(let p of parts){
+                    p = p.trim();
+                    if(!p) continue;
+                    if(p.startsWith('</')){
+                        indent = Math.max(0, indent - 1);
+                        formatted += '  '.repeat(indent) + p + '\n';
+                    } else if(p.startsWith('<!--')){
+                        formatted += '  '.repeat(indent) + p + '\n';
+                    } else {
+                        formatted += '  '.repeat(indent) + p + '\n';
+                        if(!p.startsWith('<') || !p.endsWith('/>') && !p.startsWith('<')){
+                            const tagMatch = p.match(/^<(\w+)/);
+                            if(tagMatch && !p.endsWith('/>')){
+                                const tagName = tagMatch[1];
+                                if(!['img','br','hr','input','meta','link','area','base','col','embed','param','source','track','wbr'].includes(tagName.toLowerCase())){
+                                    indent++;
+                                }
+                            }
+                        }
+                    }
+                }
+                ed.value = formatted.trim();
+            } else if(currentTab === 'css'){
+                let css = ed.value;
+                css = css.replace(/\s*{\s*/g, ' {\n  ');
+                css = css.replace(/\s*;\s*/g, ';\n  ');
+                css = css.replace(/\s*}\s*/g, '\n}\n');
+                css = css.replace(/  \n/g, '\n').replace(/\n\s*\n/g, '\n');
+                ed.value = css.trim();
+            } else if(currentTab === 'json'){
+                try {
+                    const obj = JSON.parse(ed.value);
+                    ed.value = JSON.stringify(obj, null, 2);
+                    showToast('JSON格式化成功');
+                } catch(e) {
+                    showToast('JSON格式错误', 'error');
+                }
+            }
+            if(currentTab !== 'json') showToast('代码已格式化');
+            updatePreview();
+            if(autoDraftOn) autoSaveDraft();
+        }
+
+        document.getElementById('formatCode').onclick = formatCode;
+
+        document.getElementById('replaceHtmlBtn').onclick = () => openReplaceDialog('html');
+        document.getElementById('replaceCssBtn').onclick = () => openReplaceDialog('css');
+        document.getElementById('replaceJsonBtn').onclick = () => openReplaceDialog('json');
+
+        function openReplaceDialog(type){
+            const curTab = currentTab;
+            switchTabByKey(type);
+            searchBar.classList.remove('hidden');
+            searchInput.value = '';
+            replaceInput.value = '';
+            searchInput.focus();
+            searchMatches = [];
+            currentSearchIndex = -1;
+        }
+
+        searchInput.oninput = () => performSearch(true);
+        searchInput.onkeydown = e => {
+            if(e.key === 'Enter'){
+                if(e.shiftKey) performSearch(false);
+                else performSearch(true);
+            }
+            if(e.key === 'Escape') closeSearchBar();
+        };
+        replaceInput.onkeydown = e => {
+            if(e.key === 'Enter' && e.ctrlKey) doReplace();
+        };
+
+        document.getElementById('doSearchPrev').onclick = () => performSearch(false);
+        document.getElementById('doSearchNext').onclick = () => performSearch(true);
+        document.getElementById('doReplace').onclick = doReplace;
+        document.getElementById('doReplaceAll').onclick = doReplaceAll;
+        document.getElementById('closeSearch').onclick = closeSearchBar;
+
+        function performSearch(forward = true){
+            const ed = getCurrentEditor();
+            const searchText = searchInput.value;
+            if(!searchText){ clearHighlights(); return; }
+            const content = ed.value;
+            const regex = new RegExp(searchText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
+            const matches = [...content.matchAll(regex)];
+            searchMatches = matches.map(m => m.index);
+            if(searchMatches.length === 0){ clearHighlights(); showToast('未找到', 'error'); return; }
+            if(forward){ currentSearchIndex = (currentSearchIndex + 1) % searchMatches.length; }
+            else { currentSearchIndex = (currentSearchIndex - 1 + searchMatches.length) % searchMatches.length; }
+            highlightAndScroll();
+            showToast(`第${currentSearchIndex + 1}个，共${searchMatches.length}个`);
+        }
+
+        function highlightAndScroll(){
+            const ed = getCurrentEditor();
+            const pos = searchMatches[currentSearchIndex];
+            ed.focus();
+            ed.setSelectionRange(pos, pos + searchInput.value.length);
+            const lineHeight = parseInt(getComputedStyle(ed).lineHeight) || 20;
+            const scrollTop = Math.max(0, pos * lineHeight - ed.clientHeight / 2);
+            ed.scrollTop = scrollTop;
+        }
+
+        function clearHighlights(){
+            searchMatches = [];
+            currentSearchIndex = -1;
+        }
+
+        function doReplace(){
+            const ed = getCurrentEditor();
+            const searchText = searchInput.value;
+            const replaceText = replaceInput.value;
+            if(currentSearchIndex < 0){ showToast('请先搜索', 'error'); return; }
+            pushUndo();
+            ed.value = ed.value.substring(0, searchMatches[currentSearchIndex]) + replaceText + ed.value.substring(searchMatches[currentSearchIndex] + searchText.length);
+            performSearch(true);
+            if(autoDraftOn) autoSaveDraft();
+            updatePreview();
+        }
+
+        function doReplaceAll(){
+            const ed = getCurrentEditor();
+            const searchText = searchInput.value;
+            const replaceText = replaceInput.value;
+            if(!searchText){ showToast('请输入搜索内容', 'error'); return; }
+            pushUndo();
+            const regex = new RegExp(searchText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g');
+            let count = 0;
+            ed.value = ed.value.replace(regex, (match) => { count++; return replaceText; });
+            clearHighlights();
+            showToast(`已替换 ${count} 处`);
+            if(autoDraftOn) autoSaveDraft();
+            updatePreview();
+        }
+
+        function closeSearchBar(){
+            searchBar.classList.add('hidden');
+            clearHighlights();
+        }
+
+        let selectMode = false;
+        let selectedFiles = {html: true, css: true, json: true};
+
+        downloadSelectBtn.onclick = () => {
+            if(selectMode){ downloadSelected(); return; }
+            selectMode = true;
+            openDownloadSelectDialog();
+        };
+
+        function openDownloadSelectDialog(){
+            const d = document.createElement('dialog');
+            d.id = 'selectDownloadDialog';
+            d.innerHTML = `
+                <h3>选择要下载的内容</h3>
+                <div class="form-group">
+                    <label class="select-item ${htmlEditor.value.trim() ? '' : 'disabled'}" onclick="toggleSelect('html')">
+                        <input type="checkbox" id="selHtml" ${selectedFiles.html ? 'checked' : ''} ${!htmlEditor.value.trim() ? 'disabled' : ''}>
+                        HTML ${htmlEditor.value.trim() ? '' : '(空)'}
+                    </label>
+                </div>
+                <div class="form-group">
+                    <label class="select-item ${cssEditor.value.trim() ? '' : 'disabled'}" onclick="toggleSelect('css')">
+                        <input type="checkbox" id="selCss" ${selectedFiles.css ? 'checked' : ''} ${!cssEditor.value.trim() ? 'disabled' : ''}>
+                        CSS ${cssEditor.value.trim() ? '' : '(空)'}
+                    </label>
+                </div>
+                <div class="form-group">
+                    <label class="select-item ${jsonEditor.value.trim() ? '' : 'disabled'}" onclick="toggleSelect('json')">
+                        <input type="checkbox" id="selJson" ${selectedFiles.json ? 'checked' : ''} ${!jsonEditor.value.trim() ? 'disabled' : ''}>
+                        JSON ${jsonEditor.value.trim() ? '' : '(空)'}
+                    </label>
+                </div>
+                <div class="modal-actions">
+                    <button class="btn btn-secondary" id="cancelSelect">取消</button>
+                    <button class="btn" id="confirmSelect">下载</button>
+                </div>
+            `;
+            document.body.appendChild(d);
+            d.showModal();
+            document.getElementById('cancelSelect').onclick = () => { d.close(); document.body.removeChild(d); selectMode = false; };
+            document.getElementById('confirmSelect').onclick = () => {
+                selectedFiles.html = document.getElementById('selHtml').checked;
+                selectedFiles.css = document.getElementById('selCss').checked;
+                selectedFiles.json = document.getElementById('selJson').checked;
+                d.close();
+                document.body.removeChild(d);
+                downloadSelected();
+                selectMode = false;
+            };
+            d.onclose = () => { if(document.body.contains(d)) document.body.removeChild(d); selectMode = false; };
+        }
+
+        window.toggleSelect = (type) => {
+            const cb = document.getElementById('sel' + type.charAt(0).toUpperCase() + type.slice(1));
+            if(cb && !cb.disabled) cb.checked = !cb.checked;
+        };
+
+        function downloadSelected(){
+            const hasAny = selectedFiles.html && htmlEditor.value.trim() ||
+                          selectedFiles.css && cssEditor.value.trim() ||
+                          selectedFiles.json && jsonEditor.value.trim();
+            if(!hasAny){ showToast('没有可下载的内容', 'error'); return; }
+            function download(name, content){
+                const blob = new Blob([content], {type: 'text/plain'});
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url; a.download = name;
+                a.click();
+                URL.revokeObjectURL(url);
+            }
+            if(selectedFiles.html && htmlEditor.value.trim()) download('index.html', htmlEditor.value);
+            if(selectedFiles.css && cssEditor.value.trim()) download('style.css', cssEditor.value);
+            if(selectedFiles.json && jsonEditor.value.trim()) download('config.json', jsonEditor.value);
+            showToast('下载完成');
+        }
+
+        function openFeishuConfigDialog(){
+            const d = document.createElement('dialog');
+            const savedToken = localStorage.getItem('feishuToken') || '';
+            const savedWebhook = localStorage.getItem('feishuWebhook') || '';
+            d.innerHTML = `
+                <h3>飞书配置</h3>
+                <div class="form-group">
+                    <label class="config-label">Access Token</label>
+                    <input type="text" id="feishuTokenInput" class="feishu-token-input" value="${savedToken}" placeholder="填写飞书Access Token">
+                </div>
+                <div class="form-group">
+                    <label class="config-label">Webhook地址</label>
+                    <input type="text" id="feishuWebhookInput" class="feishu-token-input" value="${savedWebhook}" placeholder="填写飞书Webhook地址">
+                </div>
+                <div class="form-group">
+                    <label class="config-label">说明：Access Token用于API调用，Webhook用于消息推送</label>
+                </div>
+                <div class="modal-actions">
+                    <button class="btn btn-secondary" id="cancelFeishu">取消</button>
+                    <button class="btn btn-secondary" id="testFeishu">测试</button>
+                    <button class="btn" id="saveFeishu">保存</button>
+                </div>
+            `;
+            document.body.appendChild(d);
+            d.showModal();
+            document.getElementById('cancelFeishu').onclick = () => { d.close(); document.body.removeChild(d); };
+            document.getElementById('saveFeishu').onclick = () => {
+                localStorage.setItem('feishuToken', document.getElementById('feishuTokenInput').value);
+                localStorage.setItem('feishuWebhook', document.getElementById('feishuWebhookInput').value);
+                d.close();
+                document.body.removeChild(d);
+                showToast('飞书配置已保存');
+            };
+            document.getElementById('testFeishu').onclick = async () => {
+                const webhook = document.getElementById('feishuWebhookInput').value;
+                if(!webhook){ showToast('请输入Webhook地址', 'error'); return; }
+                try {
+                    const resp = await fetch(webhook, {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({msg_type: 'text', content: {text: '🎉 飞书配置测试成功！'}})
+                    });
+                    if(resp.ok) showToast('测试消息发送成功');
+                    else showToast('发送失败', 'error');
+                } catch(e){ showToast('网络错误', 'error'); }
+            };
+            d.onclose = () => { if(document.body.contains(d)) document.body.removeChild(d); };
+        }
+
+        document.getElementById('configFeishu').onclick = openFeishuConfigDialog;
+
+        function openGithubConfigDialog(){
+            const d = document.createElement('dialog');
+            const savedToken = localStorage.getItem('githubToken') || '';
+            const savedRepo = localStorage.getItem('githubRepo') || '';
+            d.innerHTML = `
+                <h3>GitHub配置</h3>
+                <div class="form-group">
+                    <label class="config-label">Personal Access Token</label>
+                    <input type="password" id="githubTokenInput" class="feishu-token-input" value="${savedToken}" placeholder="填写GitHub Token">
+                </div>
+                <div class="form-group">
+                    <label class="config-label">仓库 (owner/repo)</label>
+                    <input type="text" id="githubRepoInput" class="feishu-token-input" value="${savedRepo}" placeholder="如: username/my-project">
+                </div>
+                <div class="form-group">
+                    <label class="config-label">说明：Token需要repo权限才能创建文件</label>
+                </div>
+                <div class="modal-actions">
+                    <button class="btn btn-secondary" id="cancelGithub">取消</button>
+                    <button class="btn" id="saveGithub">保存</button>
+                </div>
+            `;
+            document.body.appendChild(d);
+            d.showModal();
+            document.getElementById('cancelGithub').onclick = () => { d.close(); document.body.removeChild(d); };
+            document.getElementById('saveGithub').onclick = () => {
+                localStorage.setItem('githubToken', document.getElementById('githubTokenInput').value);
+                localStorage.setItem('githubRepo', document.getElementById('githubRepoInput').value);
+                d.close();
+                document.body.removeChild(d);
+                showToast('GitHub配置已保存');
+            };
+            d.onclose = () => { if(document.body.contains(d)) document.body.removeChild(d); };
+        }
+
+        document.getElementById('configGithub').onclick = openGithubConfigDialog;
+
+        async function sendToFeishu(){
+            const webhook = localStorage.getItem('feishuWebhook');
+            if(!webhook){ showToast('请先配置飞书Webhook', 'error'); openFeishuConfigDialog(); return; }
+            const html = htmlEditor.value;
+            const css = cssEditor.value;
+            const jsonTxt = jsonEditor.value;
+            let jt = '{}';
+            try { jt = JSON.stringify(JSON.parse(jsonTxt)); } catch(e){}
+            const page = `<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>${css}</style>
+</head>
+<body>
+${html}
+<script>window.previewConfig=${jt};<\/script>
+</body>
+</html>`;
+            try {
+                const resp = await fetch(webhook, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        msg_type: 'interactive',
+                        card: {
+                            config: {wide_screen_mode: true},
+                            elements: [{
+                                tag: 'markdown',
+                                content: `**HTML预览工作台导出**\n\`\`\`html\n${html.substring(0, 500)}${html.length > 500 ? '...' : ''}\n\`\`\``
+                            }]
+                        }
+                    })
+                });
+                if(resp.ok) showToast('已发送到飞书');
+                else showToast('发送失败', 'error');
+            } catch(e){ showToast('网络错误', 'error'); }
+        }
+
+        async function pushToGithub(){
+            const token = localStorage.getItem('githubToken');
+            const repo = localStorage.getItem('githubRepo');
+            if(!token || !repo){ showToast('请先配置GitHub', 'error'); openGithubConfigDialog(); return; }
+            const html = htmlEditor.value;
+            const css = cssEditor.value;
+            const jsonTxt = jsonEditor.value;
+            let jt = '{}';
+            try { jt = JSON.stringify(JSON.parse(jsonTxt)); } catch(e){}
+            const name = prompt('输入文件名:', 'preview.html');
+            if(!name) return;
+            try {
+                const content = btoa(unescape(encodeURIComponent(`<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>${css}</style>
+</head>
+<body>
+${html}
+<script>window.previewConfig=${jt};<\/script>
+</body>
+</html>`)));
+                const resp = await fetch(`https://api.github.com/repos/${repo}/contents/${name}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `token ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ message: 'Upload from HTML Preview Studio', content })
+                });
+                if(resp.ok){
+                    const data = await resp.json();
+                    showToast('已上传到GitHub');
+                } else {
+                    const err = await resp.json();
+                    showToast(err.message || '上传失败', 'error');
+                }
+            } catch(e){ showToast('网络错误', 'error'); }
+        }
+
         function init() {
-            document.getElementById('feishuAppId').value = feishuConfig.appId||'';
-            document.getElementById('feishuAppSecret').value = feishuConfig.appSecret||'';
-            document.getElementById('feishuTableToken').value = feishuConfig.tableToken||'';
-            document.getElementById('feishuTableId').value = feishuConfig.tableId||'';
-
-            document.getElementById('githubUsername').value = githubConfig.username||'';
-            document.getElementById('githubRepo').value = githubConfig.repo||'';
-            document.getElementById('githubBranch').value = githubConfig.branch||'main';
-            document.getElementById('githubToken').value = githubConfig.token||'';
-
             tabs.forEach(t=>t.onclick=switchTab);
             [htmlEditor,cssEditor,jsonEditor].forEach(el=>{
                 el.oninput = ()=>{
                     updatePreview();
+                    updateCursorPosition();
                     if(autoDraftOn) autoSaveDraft();
+                };
+                el.onclick = ()=> updateCursorPosition();
+                el.onkeyup = ()=> updateCursorPosition();
+                el.onkeydown = e => {
+                    if(e.ctrlKey && e.key === 'z'){ e.preventDefault(); undo(); }
+                    if(e.ctrlKey && e.key === 'y'){ e.preventDefault(); redo(); }
+                    if(e.ctrlKey && e.key === 's'){ e.preventDefault(); currentProjectId ? confirmSaveProject() : openSaveModal(); }
+                    if(e.ctrlKey && e.key === 'f'){ e.preventDefault(); searchBar.classList.toggle('hidden'); if(!searchBar.classList.contains('hidden')) searchInput.focus(); }
+                    if(e.key === 'Tab'){
+                        e.preventDefault();
+                        const start = el.selectionStart;
+                        const end = el.selectionEnd;
+                        el.value = el.value.substring(0, start) + '  ' + el.value.substring(end);
+                        el.selectionStart = el.selectionEnd = start + 2;
+                        updatePreview();
+                    }
                 };
             });
 
@@ -513,65 +1086,27 @@
                 autoDraftOn = !autoDraftOn;
                 localStorage.setItem('autoDraftOn', autoDraftOn ? '1' : '0');
                 updateDraftBtnText();
-                if(autoDraftOn){
-                    autoSaveDraft();
-                    showToast("已开启自动草稿","success");
-                }else{
-                    localStorage.removeItem('previewDraft');
-                    showToast("已关闭自动草稿，并清除旧草稿","success");
-                }
+                autoDraftOn ? autoSaveDraft() : localStorage.removeItem('previewDraft');
+                showToast(autoDraftOn ? "已开启自动草稿" : "已关闭自动草稿并清除");
             };
 
             document.getElementById('toggleSidebar').onclick = ()=>{
                 projectSidebar.classList.toggle('sidebar-show');
             };
 
-            document.getElementById('newProject').onclick=newProject;
-            document.getElementById('saveProject').onclick=saveProjectHandle;
-            document.getElementById('saveAsProject').onclick=saveAsProjectHandle;
-            document.getElementById('refreshProject').onclick=renderProjectList;
-            document.getElementById('clearAllBtn').onclick=clearAllContent;
-            document.getElementById('refreshPreview').onclick=updatePreview;
-            document.getElementById('fullscreenBtn').onclick=togglePreviewFull;
+            document.getElementById('newProject').onclick = newProject;
+            document.getElementById('refreshProject').onclick = renderProjectList;
+            document.getElementById('clearAllBtn').onclick = clearAllContent;
+            document.getElementById('refreshPreview').onclick = updatePreview;
 
             document.getElementById('importFileBtn').onclick=()=>document.getElementById('fileInput').click();
             document.getElementById('fileInput').onchange=handleImportFile;
 
-            document.getElementById('replaceHtmlBtn').onclick=()=>openReplace('html');
-            document.getElementById('replaceCssBtn').onclick=()=>openReplace('css');
-            document.getElementById('replaceJsonBtn').onclick=()=>openReplace('json');
-            document.getElementById('cancelReplace').onclick=()=>document.getElementById('replaceModal').classList.remove('show');
-            document.getElementById('doReplace').onclick=doReplaceAll;
-
-            document.getElementById('downloadSelectBtn').onclick=openDownloadModal;
             document.getElementById('downloadAllBtn').onclick=downloadAllNow;
-            document.getElementById('cancelDownload').onclick=()=>document.getElementById('downloadModal').classList.remove('show');
-            document.getElementById('confirmDownload').onclick=confirmDownload;
-
             document.getElementById('mergeExportBtn').onclick=mergeExportHtml;
             document.getElementById('splitHtmlBtn').onclick=splitHtmlToThree;
             document.getElementById('cleanCommentBtn').onclick=cleanAllComment;
 
-            document.getElementById('configFeishu').onclick=()=>document.getElementById('feishuConfigModal').classList.add('show');
-            document.getElementById('closeFeishuConfig').onclick=()=>document.getElementById('feishuConfigModal').classList.remove('show');
-            document.getElementById('saveFeishuConfig').onclick=saveFeishuConfig;
-
-            document.getElementById('configGithub').onclick=()=>document.getElementById('githubConfigModal').classList.add('show');
-            document.getElementById('closeGithubConfig').onclick=()=>document.getElementById('githubConfigModal').classList.remove('show');
-            document.getElementById('saveGithubConfig').onclick=saveGithubConfig;
-
-            document.getElementById('pushGithubBtn').onclick=openGithubPushModal;
-            document.getElementById('cancelGithubPush').onclick=()=>document.getElementById('githubPushModal').classList.remove('show');
-            document.getElementById('confirmGithubPush').onclick=confirmPushToGithub;
-
-            document.getElementById('cancelSave').onclick=()=>document.getElementById('saveModal').classList.remove('show');
-            document.getElementById('confirmSave').onclick=confirmSaveProject;
-
-            window.onbeforeunload = e=>{
-                if(autoDraftOn && (htmlEditor.value.trim()||cssEditor.value.trim()||jsonEditor.value.trim())){
-                    e.returnValue = '内容未保存，确定离开？';
-                }
-            };
             updatePreview();
         }
 
@@ -591,7 +1126,8 @@
             const html = htmlEditor.value;
             const css = cssEditor.value;
             let jt = jsonEditor.value.trim();
-            try{jt=jt?JSON.stringify(JSON.parse(jt)):'{}';}catch(e){jt='{}';}
+            let jsonObj = {};
+            try{jt=jt?JSON.stringify(JSON.parse(jt)):'{}';jsonObj=jt?JSON.parse(jt):{};}catch(e){jt='{}';}
             const page = `
 <!DOCTYPE html>
 <html>
@@ -601,7 +1137,7 @@
 </head>
 <body>
 ${html}
-<script>window.previewJson=${jt};<\/script>
+<script>window.previewConfig=${jt};<\/script>
 </body>
 </html>`;
             const doc = previewFrame.contentDocument;
@@ -611,11 +1147,9 @@ ${html}
         function clearAllContent(){
             htmlEditor.value='';cssEditor.value='';jsonEditor.value='';
             currentProjectId=null;
-            if(!autoDraftOn){
-                localStorage.removeItem('previewDraft');
-            }
+            if(!autoDraftOn) localStorage.removeItem('previewDraft');
             updatePreview();
-            showToast('已清空','success');
+            showToast('已清空');
         }
 
         async function renderProjectList(){
@@ -650,23 +1184,26 @@ ${html}
             cssEditor.value=item.css||'';
             jsonEditor.value=item.json||'';
             updatePreview();renderProjectList();
-            showToast('已加载','success');
+            showToast('已加载');
         };
+        // 修复删除
         window.delProj = async id=>{
             if(!confirm('确定删除？'))return;
-            await dbDel('projects',id);
-            if(currentProjectId===id)currentProjectId=null;
-            renderProjectList();
-            showToast('已删除','success');
+            const t = db.transaction('projects','readwrite');
+            const st = t.objectStore('projects');
+            st.delete(id);
+            t.oncomplete = async ()=>{
+                if(currentProjectId===id)currentProjectId=null;
+                await renderProjectList();
+                showToast('已删除');
+            };
+            t.onerror = ()=>{
+                showToast('删除失败','error');
+            };
         };
 
-        function newProject(){clearAllContent();showToast('新建空白项目','success');}
-        function saveProjectHandle(){currentProjectId?confirmSaveProject():openSaveModal();}
-        function saveAsProjectHandle(){openSaveModal();}
-        function openSaveModal(){
-            document.getElementById('projectNameInput').value='';
-            document.getElementById('saveModal').classList.add('show');
-        }
+        function newProject(){clearAllContent();showToast('新建空白项目');}
+
         async function confirmSaveProject(){
             const name = document.getElementById('projectNameInput').value.trim();
             if(!name)return showToast('请输入项目名','error');
@@ -677,18 +1214,19 @@ ${html}
             if(currentProjectId){
                 data.id = currentProjectId;
                 await dbPut('projects',data);
-                showToast('已更新','success');
+                showToast('已更新');
             }else{
                 currentProjectId = await dbAdd('projects',data);
-                showToast('已保存','success');
+                showToast('已保存');
             }
-            document.getElementById('saveModal').classList.remove('show');
+            closeSaveModal();
             renderProjectList();
         }
 
         function autoSaveDraft(){
             const d = {html:htmlEditor.value,css:cssEditor.value,json:jsonEditor.value};
             localStorage.setItem('previewDraft',JSON.stringify(d));
+            showAutoSaveIndicator();
         }
         function autoRecoverDraft(){
             const s = localStorage.getItem('previewDraft');
@@ -711,13 +1249,14 @@ ${html}
                     if(ext==='html'||ext==='htm'){htmlEditor.value=txt;switchTabByKey('html');}
                     if(ext==='css'){cssEditor.value=txt;switchTabByKey('css');}
                     if(ext==='json'){jsonEditor.value=txt;switchTabByKey('json');}
+                    if(ext==='js'){htmlEditor.value += "\n<script>\n" + txt + "\n<\/script>\n";switchTabByKey('html');}
                     updatePreview();
                     if(autoDraftOn) autoSaveDraft();
                 };
                 reader.readAsText(f);
             }
             document.getElementById('fileInput').value='';
-            showToast('导入成功','success');
+            showToast('导入成功');
         }
         function switchTabByKey(key){
             currentTab = key;
@@ -726,57 +1265,19 @@ ${html}
             });
         }
 
-        function openReplace(type){
-            replaceTarget = type;
-            const title = type==='html'?'HTML查找替换':type==='css'?'CSS查找替换':'JSON查找替换';
-            document.getElementById('replaceTitle').innerText = title;
-            document.getElementById('findText').value='';
-            document.getElementById('replaceText').value='';
-            document.getElementById('replaceModal').classList.add('show');
-        }
-        function doReplaceAll(){
-            const find = document.getElementById('findText').value;
-            const rep = document.getElementById('replaceText').value;
-            if(!find)return showToast('请输入查找内容','error');
-            let editor = replaceTarget==='html' ? htmlEditor : replaceTarget==='css' ? cssEditor : jsonEditor;
-            editor.value = editor.value.split(find).join(rep);
-            updatePreview();
-            if(autoDraftOn) autoSaveDraft();
-            document.getElementById('replaceModal').classList.remove('show');
-            showToast('替换完成','success');
-        }
-
-        function openDownloadModal(){
-            document.getElementById('downHtml').checked = htmlEditor.value.trim()!=='';
-            document.getElementById('downCss').checked = cssEditor.value.trim()!=='';
-            document.getElementById('downJson').checked = jsonEditor.value.trim()!=='';
-            document.getElementById('downloadModal').classList.add('show');
-        }
-        function confirmDownload(){
-            let down = false;
-            if(document.getElementById('downHtml').checked && htmlEditor.value.trim()){downloadFile('index.html',htmlEditor.value);down=true;}
-            if(document.getElementById('downCss').checked && cssEditor.value.trim()){downloadFile('style.css',cssEditor.value);down=true;}
-            if(document.getElementById('downJson').checked && jsonEditor.value.trim()){downloadFile('config.json',jsonEditor.value);down=true;}
-            document.getElementById('downloadModal').classList.remove('show');
-            if(!down)showToast('没有可下载内容','error');
-            else showToast('下载已开始','success');
-        }
         function downloadAllNow(){
-            let has = false;
-            if(htmlEditor.value.trim()){downloadFile('index.html',htmlEditor.value);has=true;}
-            if(cssEditor.value.trim()){downloadFile('style.css',cssEditor.value);has=true;}
-            if(jsonEditor.value.trim()){downloadFile('config.json',jsonEditor.value);has=true;}
-            if(!has)showToast('没有可下载内容','error');
-            else showToast('一键下载完成','success');
-        }
-        function downloadFile(name,content){
-            const blob = new Blob([content],{type:'text/plain'});
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;a.download = name;
-            document.body.appendChild(a);a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
+            function download(name,content){
+                const blob = new Blob([content],{type:'text/plain'});
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;a.download = name;
+                a.click();
+                URL.revokeObjectURL(url);
+            }
+            if(htmlEditor.value.trim()) download('index.html',htmlEditor.value);
+            if(cssEditor.value.trim()) download('style.css',cssEditor.value);
+            if(jsonEditor.value.trim()) download('config.json',jsonEditor.value);
+            showToast('一键下载完成');
         }
 
         function mergeExportHtml(){
@@ -790,14 +1291,14 @@ ${html}
                     const jsonObj = JSON.parse(jsonTxt);
                     jsonBlock = `<script>window.previewConfig = ${JSON.stringify(jsonObj,null,2)};<\/script>\n`;
                 }catch(e){
-                    return showToast('JSON格式错误，无法合并','error');
+                    return showToast('JSON格式错误','error');
                 }
             }
             const merged = `<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
 ${styleBlock}
 </head>
 <body>
@@ -805,8 +1306,13 @@ ${html}
 ${jsonBlock}
 </body>
 </html>`;
-            downloadFile('merged_index.html', merged);
-            showToast('合并导出成功','success');
+            const blob = new Blob([merged],{type:'text/html'});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;a.download = 'merged_index.html';
+            a.click();
+            URL.revokeObjectURL(url);
+            showToast('合并导出成功');
         }
 
         function splitHtmlToThree(){
@@ -834,76 +1340,24 @@ ${jsonBlock}
             if(autoDraftOn) autoSaveDraft();
             switchTabByKey('html');
             updatePreview();
-            showToast('拆分完成','success');
+            showToast('拆分完成');
         }
 
         function cleanAllComment(){
-            let h = htmlEditor.value.replace(/<!--[\s\S]*?-->/g,'').replace(/\n\s*\n/g,'\n').trim();
-            htmlEditor.value = h;
-            let c = cssEditor.value.replace(/\/\*[\s\S]*?\*\//g,'').replace(/\n\s*\n/g,'\n').trim();
-            cssEditor.value = c;
-            let j = jsonEditor.value.replace(/\/\/.*$/gm,'').replace(/\n\s*\n/g,'\n').trim();
-            jsonEditor.value = j;
+            htmlEditor.value = htmlEditor.value.replace(/<!--[\s\S]*?-->/g,'').replace(/\n\s*\n/g,'\n').trim();
+            cssEditor.value = cssEditor.value.replace(/\/\*[\s\S]*?\*\//g,'').replace(/\n\s*\n/g,'\n').trim();
+            jsonEditor.value = jsonEditor.value
+                .replace(/\/\*[\s\S]*?\*\//g,'')
+                .replace(/\/\/[^\n]*/g,'')
+                .replace(/\n\s*\n/g,'\n').trim();
             if(autoDraftOn) autoSaveDraft();
             updatePreview();
-            showToast('已清理所有AI描述注释','success');
+            showToast('已清理注释');
         }
 
-        function togglePreviewFull(){
-            isPreviewFull = !isPreviewFull;
-            const p = document.getElementById('editorPanel');
-            if(isPreviewFull){
-                p.classList.add('hide-left');
-                document.getElementById('fullscreenBtn').textContent='退出预览全屏';
-                showToast('预览已全屏','success');
-            }else{
-                p.classList.remove('hide-left');
-                document.getElementById('fullscreenBtn').textContent='预览全屏';
-                showToast('已退出全屏','success');
-            }
-        }
-
-        function saveFeishuConfig(){
-            const cfg = {
-                appId:document.getElementById('feishuAppId').value.trim(),
-                appSecret:document.getElementById('feishuAppSecret').value.trim(),
-                tableToken:document.getElementById('feishuTableToken').value.trim(),
-                tableId:document.getElementById('feishuTableId').value.trim()
-            };
-            if(!cfg.appId||!cfg.appSecret||!cfg.tableToken||!cfg.tableId)return showToast('请填完整','error');
-            feishuConfig=cfg;localStorage.setItem('feishuConfig',JSON.stringify(cfg));
-            document.getElementById('feishuConfigModal').classList.remove('show');
-            showToast('飞书配置已保存','success');
-        }
-
-        function saveGithubConfig(){
-            const cfg = {
-                username:document.getElementById('githubUsername').value.trim(),
-                repo:document.getElementById('githubRepo').value.trim(),
-                branch:document.getElementById('githubBranch').value.trim()||'main',
-                token:document.getElementById('githubToken').value.trim()
-            };
-            if(!cfg.username||!cfg.repo||!cfg.token)return showToast('请填完整GitHub配置','error');
-            githubConfig=cfg;localStorage.setItem('githubConfig',JSON.stringify(cfg));
-            document.getElementById('githubConfigModal').classList.remove('show');
-            showToast('GitHub配置已保存','success');
-        }
-        function openGithubPushModal(){
-            if(!githubConfig.username||!githubConfig.repo||!githubConfig.token){
-                return showToast('请先配置GitHub','error');
-            }
-            document.getElementById('pushCss').checked = cssEditor.value.trim()!=='';
-            document.getElementById('pushJson').checked = jsonEditor.value.trim()!=='';
-            document.getElementById('githubPushModal').classList.add('show');
-        }
-        function confirmPushToGithub(){
-            showToast('推送功能已预留','success');
-            document.getElementById('githubPushModal').classList.remove('show');
-        }
-
-        function showToast(msg,type=''){
+        function showToast(msg,type='success'){
             toast.textContent=msg;
-            toast.className='toast '+type+' show';
+            toast.className=`toast ${type} show`;
             setTimeout(()=>toast.classList.remove('show'),3000);
         }
     </script>
