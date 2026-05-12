@@ -155,22 +155,24 @@
             }
             .toolbar-actions {
                 position: fixed;
-                top: 54px;
+                bottom: 0;
                 left: 0;
                 right: 0;
                 background: rgba(20, 20, 40, 0.98);
                 backdrop-filter: blur(12px);
-                border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+                border-top: 1px solid rgba(255, 255, 255, 0.1);
                 padding: 16px;
+                padding-bottom: calc(16px + env(safe-area-inset-bottom));
                 flex-wrap: wrap;
                 z-index: 1001;
                 display: none !important;
-                transform: translateY(-100%);
+                transform: translateY(100%);
                 transition: transform 0.3s ease;
-                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+                box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3);
                 justify-content: center;
-                max-height: 60vh;
+                max-height: 70vh;
                 overflow-y: auto;
+                box-sizing: border-box;
             }
             .toolbar-actions.mobile-show {
                 display: flex !important;
@@ -689,7 +691,6 @@
         <button class="btn btn-secondary" id="redoBtn">↪️</button>
 
         <button class="btn btn-toggle" id="draftToggle">草稿</button>
-        <button class="btn" id="fullscreenBtn">全屏</button>
 
         <div class="toolbar-actions">
             <button class="btn btn-secondary" id="saveAsProject">另存为</button>
@@ -745,6 +746,7 @@
                 <div style="display: flex; align-items: center; gap: 12px;">
                     <span>实时预览</span>
                     <button class="mini-btn" id="refreshPreview">刷新预览</button>
+                    <button class="mini-btn" id="fullscreenBtn">全屏</button>
                 </div>
                 <button class="toggle-editor-btn" id="toggleEditorBtn" title="收起/展开编辑器">≡</button>
             </div>
