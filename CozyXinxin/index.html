@@ -191,64 +191,58 @@
             .toolbar-actions-overlay.show {
                 display: block;
             }
-            .toolbar-hideable {
-                transition: transform 0.3s ease;
-                z-index: 999 !important;
-            }
-            .toolbar-hidden {
-                transform: translateY(-100%);
-            }
+        }
+
         .editor-tabs {
-                overflow-x: auto;
-                -webkit-overflow-scrolling: touch;
-            }
-            .tab {
-                padding: 8px 12px;
-                font-size: 12px;
-            }
-            .search-bar {
-                padding: 6px 8px;
-                gap: 4px;
-            }
-            .search-bar input {
-                min-width: 80px;
-                font-size: 14px;
-                padding: 6px 8px;
-            }
-            .preview-header {
-                padding: 6px 10px;
-            }
-            .status-bar {
-                padding: 3px 8px;
-                font-size: 10px;
-                gap: 10px;
-            }
-            .project-sidebar {
-                position: absolute;
-                z-index: 200;
-                height: calc(100% - 50px);
-                top: 50px;
-            }
-            .sidebar-show {
-                width: 200px;
-            }
-            .main-wrap {
-                position: relative;
-            }
-            dialog {
-                width: 95%;
-                max-width: 95%;
-                padding: 15px;
-            }
-            .form-group input {
-                font-size: 16px !important;
-            }
-            .shortcuts-hint {
-                right: 5px;
-                bottom: 50px;
-                max-width: 250px;
-                font-size: 11px;
-            }
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        .tab {
+            padding: 8px 12px;
+            font-size: 12px;
+        }
+        .search-bar {
+            padding: 6px 8px;
+            gap: 4px;
+        }
+        .search-bar input {
+            min-width: 80px;
+            font-size: 14px;
+            padding: 6px 8px;
+        }
+        .preview-header {
+            padding: 6px 10px;
+        }
+        .status-bar {
+            padding: 3px 8px;
+            font-size: 10px;
+            gap: 10px;
+        }
+        .project-sidebar {
+            position: absolute;
+            z-index: 200;
+            height: calc(100% - 50px);
+            top: 50px;
+        }
+        .sidebar-show {
+            width: 200px;
+        }
+        .main-wrap {
+            position: relative;
+        }
+        dialog {
+            width: 95%;
+            max-width: 95%;
+            padding: 15px;
+        }
+        .form-group input {
+            font-size: 16px !important;
+        }
+        .shortcuts-hint {
+            right: 5px;
+            bottom: 50px;
+            max-width: 250px;
+            font-size: 11px;
         }
 
         @media (max-width: 480px) {
@@ -269,6 +263,18 @@
             overflow: hidden;
             width: 100%;
             height: 100%;
+        }
+        .main-wrap.fullscreen-mode .project-sidebar {
+            width: 0;
+            border: none;
+        }
+        .main-wrap.fullscreen-mode .editor-panel {
+            flex: 0 0 0;
+            overflow: hidden;
+            border: none;
+        }
+        .main-wrap.fullscreen-mode .preview-panel {
+            flex: 1;
         }
         .project-sidebar {
             width: 0;
@@ -348,16 +354,7 @@
             min-width: 0;
             height: 100%;
         }
-        .editor-panel.hide-left {
-            flex: 0 0 0;
-            opacity: 0;
-            overflow: hidden;
-            border-right: none;
-        }
         .editor-panel.hidden {
-            display: none;
-        }
-        .editor-hidden .editor-panel {
             display: none;
         }
         .editor-hidden .preview-panel {
@@ -846,47 +843,25 @@
         });
 
         const mainToolbar = document.getElementById('mainToolbar');
+        const mainWrap = document.querySelector('.main-wrap');
         let isToolbarHidden = false;
         
         fullscreenBtn.onclick = function(){
             isPreviewFull = !isPreviewFull;
             if(isPreviewFull){
-                editorPanel.classList.add('hide-left');
+                mainWrap.classList.add('fullscreen-mode');
                 fullscreenBtn.textContent = '退出全屏';
-                mainToolbar.classList.add('toolbar-hideable');
             }else{
-                editorPanel.classList.remove('hide-left');
-                fullscreenBtn.textContent = '预览全屏';
-                mainToolbar.classList.remove('toolbar-hideable');
-                mainToolbar.classList.remove('toolbar-hidden');
-                isToolbarHidden = false;
+                mainWrap.classList.remove('fullscreen-mode');
+                fullscreenBtn.textContent = '全屏';
             }
         };
         
         document.addEventListener('keydown', (e) => {
             if(isPreviewFull && e.key === 'Escape'){
                 isPreviewFull = false;
-                editorPanel.classList.remove('hide-left');
-                fullscreenBtn.textContent = '预览全屏';
-                mainToolbar.classList.remove('toolbar-hideable');
-                mainToolbar.classList.remove('toolbar-hidden');
-                isToolbarHidden = false;
-            }
-        });
-        
-        let toolbarTimeout;
-        document.addEventListener('mousemove', (e) => {
-            if(isPreviewFull && mainToolbar.classList.contains('toolbar-hideable')){
-                if(e.clientY < 60){
-                    mainToolbar.classList.remove('toolbar-hidden');
-                    isToolbarHidden = false;
-                } else if(!isToolbarHidden && e.clientY > 100){
-                    clearTimeout(toolbarTimeout);
-                    toolbarTimeout = setTimeout(() => {
-                        mainToolbar.classList.add('toolbar-hidden');
-                        isToolbarHidden = true;
-                    }, 2000);
-                }
+                mainWrap.classList.remove('fullscreen-mode');
+                fullscreenBtn.textContent = '全屏';
             }
         });
 
