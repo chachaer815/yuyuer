@@ -386,14 +386,14 @@
     <div class="app-container">
         <!-- 顶部大切换器 -->
         <div class="main-tabs">
-            <div class="main-tab active" data-calc="zhufugui">朱富贵点单</div>
+            <div class="main-tab active" data-calc="zhufugui">祝福龟点单</div>
             <div class="main-tab" data-calc="buffet">自助回本</div>
         </div>
 
-        <!-- ========== 朱富贵点单计算器 ========== -->
+        <!-- ========== 祝福龟点单计算器 ========== -->
         <div class="calc-content active" id="zhufugui-calc">
             <div class="header">
-                <h1>朱富贵火锅 · 消费预估</h1>
+                <h1>祝福龟火锅 · 消费预估</h1>
                 <div class="subtitle">堂食 · 实时计算</div>
             </div>
 
@@ -1322,7 +1322,7 @@
             });
         });
 
-        // ==================== 朱富贵计算器逻辑 ====================
+        // ==================== 祝福龟计算器逻辑 ====================
         let zhufuguiTime = getNowTime();
         let currentRate = 0.68;
         let drinkSectionVisible = false;
@@ -1428,7 +1428,7 @@
             saveZhufuguiLocal();
         };
 
-        // 朱富贵事件绑定
+        // 祝福龟事件绑定
         document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('openTimeZhufugui').innerText = zhufuguiTime;
             
