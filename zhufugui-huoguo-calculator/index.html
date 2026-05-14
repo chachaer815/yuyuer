@@ -1,0 +1,1638 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>火锅计算器合集</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif;
+        }
+
+        body {
+            background: #f0f2f5;
+            padding: 4px 2px;
+        }
+
+        .app-container {
+            max-width: 400px;
+            margin: 0 auto;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+            overflow: hidden;
+        }
+
+        /* 顶部大切换器 */
+        .main-tabs {
+            display: flex;
+            background: #161823;
+        }
+        .main-tab {
+            flex: 1;
+            padding: 14px 8px;
+            color: #86909c;
+            font-size: 14px;
+            font-weight: 600;
+            text-align: center;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.2s;
+        }
+        .main-tab.active {
+            color: #fff;
+            border-bottom-color: #f53f3f;
+        }
+
+        /* 内容区域 */
+        .calc-content {
+            display: none;
+            padding: 8px 6px;
+        }
+        .calc-content.active {
+            display: block;
+        }
+
+        /* 自助类型标签页 */
+        .type-tabs {
+            display: flex;
+            background: #f7f8fa;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+        .type-tab {
+            flex: 1;
+            min-width: 70px;
+            padding: 8px 4px;
+            color: #86909c;
+            font-size: 10px;
+            font-weight: 500;
+            text-align: center;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+        .type-tab.active {
+            color: #fff;
+            background: #f53f3f;
+        }
+
+        /* 顶部 */
+        .header {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        .header h1 {
+            font-size: 18px;
+            font-weight: 700;
+            color: #161823;
+            margin-bottom: 1px;
+        }
+        .header .subtitle {
+            font-size: 11px;
+            color: #86909c;
+        }
+
+        /* 通用区域 */
+        .section-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #4e5969;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .section-label::before {
+            content: '';
+            width: 3px;
+            height: 10px;
+            background: #f53f3f;
+            border-radius: 2px;
+        }
+
+        /* 菜品列表 */
+        .item-list {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-bottom: 10px;
+        }
+        .item-card {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 6px 8px;
+            background: #f7f8fa;
+            border-radius: 8px;
+        }
+        .item-info {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        .item-name {
+            font-size: 13px;
+            font-weight: 500;
+            color: #161823;
+        }
+        .item-price {
+            font-size: 11px;
+            color: #86909c;
+        }
+        .item-price span {
+            color: #f53f3f;
+            font-weight: 600;
+        }
+
+        /* 数量控制器 */
+        .num-control {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .num-btn {
+            width: 24px;
+            height: 24px;
+            border-radius: 5px;
+            border: none;
+            background: #fff;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            font-size: 14px;
+            font-weight: 500;
+            color: #161823;
+            cursor: pointer;
+            transition: all 0.15s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .num-btn:active {
+            transform: scale(0.92);
+            background: #f2f3f5;
+        }
+        .num-input {
+            width: 28px;
+            text-align: center;
+            border: none;
+            font-size: 14px;
+            font-weight: 600;
+            color: #161823;
+            background: transparent;
+            outline: none;
+        }
+
+        /* 饮料区域 */
+        .drink-section {
+            display: none;
+            margin-bottom: 10px;
+        }
+        .drink-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 5px;
+        }
+        .drink-card {
+            padding: 5px 4px;
+            background: #f7f8fa;
+            border-radius: 6px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .drink-card:active {
+            background: #e5e6eb;
+        }
+        .drink-text {
+            display: flex;
+            flex-direction: column;
+            gap: 1px;
+        }
+        .drink-name {
+            font-size: 11px;
+            font-weight: 500;
+            color: #161823;
+        }
+        .drink-price {
+            font-size: 10px;
+            color: #f53f3f;
+            font-weight: 600;
+        }
+        .drink-checkbox {
+            width: 16px;
+            height: 16px;
+            accent-color: #f53f3f;
+        }
+
+        /* 价格输入框（自助用） - 字体16px防止iOS放大 */
+        .price-input {
+            width: 32px;
+            text-align: center;
+            border: none;
+            font-size: 16px;
+            font-weight: 600;
+            color: #f53f3f;
+            background: transparent;
+            outline: none;
+            border-bottom: 1px dashed #f53f3f;
+        }
+
+        /* 结算区域 */
+        .total-card {
+            padding: 10px 8px;
+            background: linear-gradient(135deg, #fef2f2 0%, #fff1f1 100%);
+            border-radius: 10px;
+            margin-bottom: 10px;
+        }
+        .total-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 4px 0;
+            font-size: 13px;
+            color: #4e5969;
+        }
+        .discount-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 6px 0;
+            margin: 4px 0;
+            border-top: 1px dashed #f5d1d1;
+            border-bottom: 1px dashed #f5d1d1;
+        }
+        .discount-buttons {
+            display: flex;
+            gap: 6px;
+        }
+        .discount-btn {
+            padding: 4px 10px;
+            border-radius: 6px;
+            border: none;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .discount-btn.active {
+            background: #f53f3f;
+            color: white;
+        }
+        .discount-btn.unactive {
+            background: white;
+            color: #f53f3f;
+            border: 1px solid #f53f3f;
+        }
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e5e6eb;
+            border-radius: 4px;
+            margin: 8px 0;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            background: #f53f3f;
+            border-radius: 4px;
+            transition: width 0.2s ease;
+        }
+        .progress-fill.good {
+            background: #00b42a;
+        }
+        .pay-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 8px;
+        }
+        .pay-label {
+            font-size: 15px;
+            font-weight: 600;
+            color: #161823;
+        }
+        .pay-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #f53f3f;
+        }
+        .pay-value.good {
+            color: #00b42a;
+        }
+        .per-person {
+            font-size: 11px;
+            color: #86909c;
+            text-align: right;
+            margin-top: 2px;
+        }
+        .status-text {
+            font-size: 13px;
+            text-align: center;
+            margin-top: 10px;
+            font-weight: 500;
+        }
+        .status-text.good {
+            color: #00b42a;
+        }
+        .status-text.bad {
+            color: #f53f3f;
+        }
+
+        /* 按钮 */
+        .btn {
+            width: 100%;
+            padding: 10px;
+            border-radius: 10px;
+            border: none;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .btn-primary {
+            background: #161823;
+            color: white;
+            margin-bottom: 8px;
+        }
+        .btn-primary:active {
+            background: #4e5969;
+        }
+        .btn-link {
+            background: transparent;
+            color: #4080ff;
+            padding: 0;
+            font-size: 13px;
+            font-weight: 500;
+        }
+        .btn-link:active {
+            color: #2962ff;
+        }
+
+        /* 时间 */
+        .time-info {
+            font-size: 11px;
+            color: #86909c;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- 顶部大切换器 -->
+        <div class="main-tabs">
+            <div class="main-tab active" data-calc="zhufugui">朱富贵点单</div>
+            <div class="main-tab" data-calc="buffet">自助回本</div>
+        </div>
+
+        <!-- ========== 朱富贵点单计算器 ========== -->
+        <div class="calc-content active" id="zhufugui-calc">
+            <div class="header">
+                <h1>朱富贵火锅 · 消费预估</h1>
+                <div class="subtitle">堂食 · 实时计算</div>
+            </div>
+
+            <!-- 可折扣菜品 -->
+            <div class="section-label">可折扣菜品</div>
+            <div class="item-list">
+                <div class="item-card" data-discountable="true">
+                    <div class="item-info">
+                        <div class="item-name">绿盘</div>
+                        <div class="item-price">单价 <span>¥5</span></div>
+                    </div>
+                    <div class="num-control">
+                        <button class="num-btn minus">-</button>
+                        <input type="text" class="num-input" value="0" data-price="5">
+                        <button class="num-btn plus">+</button>
+                    </div>
+                </div>
+                <div class="item-card" data-discountable="true">
+                    <div class="item-info">
+                        <div class="item-name">黄盘</div>
+                        <div class="item-price">单价 <span>¥10</span></div>
+                    </div>
+                    <div class="num-control">
+                        <button class="num-btn minus">-</button>
+                        <input type="text" class="num-input" value="0" data-price="10">
+                        <button class="num-btn plus">+</button>
+                    </div>
+                </div>
+                <div class="item-card" data-discountable="true">
+                    <div class="item-info">
+                        <div class="item-name">红盘</div>
+                        <div class="item-price">单价 <span>¥15</span></div>
+                    </div>
+                    <div class="num-control">
+                        <button class="num-btn minus">-</button>
+                        <input type="text" class="num-input" value="0" data-price="15">
+                        <button class="num-btn plus">+</button>
+                    </div>
+                </div>
+                <div class="item-card" data-discountable="true">
+                    <div class="item-info">
+                        <div class="item-name">铁盘</div>
+                        <div class="item-price">单价 <span>¥22</span></div>
+                    </div>
+                    <div class="num-control">
+                        <button class="num-btn minus">-</button>
+                        <input type="text" class="num-input" value="0" data-price="22">
+                        <button class="num-btn plus">+</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 基础费用 -->
+            <div class="section-label">基础费用（不打折）</div>
+            <div class="item-list">
+                <div class="item-card" data-discountable="false">
+                    <div class="item-info">
+                        <div class="item-name">锅底(人)</div>
+                        <div class="item-price">单价 <span>¥12</span></div>
+                    </div>
+                    <div class="num-control">
+                        <button class="num-btn minus">-</button>
+                        <input type="text" class="num-input" value="0" data-price="12">
+                        <button class="num-btn plus">+</button>
+                    </div>
+                </div>
+                <div class="item-card" data-discountable="false">
+                    <div class="item-info">
+                        <div class="item-name">调料(人)</div>
+                        <div class="item-price">单价 <span>¥4</span></div>
+                    </div>
+                    <div class="num-control">
+                        <button class="num-btn minus">-</button>
+                        <input type="text" class="num-input" value="0" data-price="4">
+                        <button class="num-btn plus">+</button>
+                    </div>
+                </div>
+                <div class="item-card" data-discountable="false">
+                    <div class="item-info">
+                        <div class="item-name">清水锅底(人)</div>
+                        <div class="item-price">单价 <span>¥6</span></div>
+                    </div>
+                    <div class="num-control">
+                        <button class="num-btn minus">-</button>
+                        <input type="text" class="num-input" value="0" data-price="6">
+                        <button class="num-btn plus">+</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 饮料酒水 -->
+            <div class="drink-section" id="drinkSection">
+                <div class="section-label">饮料酒水（不打折）</div>
+                <div class="drink-grid">
+                    <div class="drink-card" data-price="3">
+                        <div class="drink-text">
+                            <div class="drink-name">玻璃瓶</div>
+                            <div class="drink-price">¥3</div>
+                        </div>
+                        <input type="checkbox" class="drink-checkbox">
+                    </div>
+                    <div class="drink-card" data-price="7">
+                        <div class="drink-text">
+                            <div class="drink-name">小椰汁</div>
+                            <div class="drink-price">¥7</div>
+                        </div>
+                        <input type="checkbox" class="drink-checkbox">
+                    </div>
+                    <div class="drink-card" data-price="5">
+                        <div class="drink-text">
+                            <div class="drink-name">可乐雪芬</div>
+                            <div class="drink-price">¥5</div>
+                        </div>
+                        <input type="checkbox" class="drink-checkbox">
+                    </div>
+                    <div class="drink-card" data-price="8">
+                        <div class="drink-text">
+                            <div class="drink-name">宋柚汁</div>
+                            <div class="drink-price">¥8</div>
+                        </div>
+                        <input type="checkbox" class="drink-checkbox">
+                    </div>
+                    <div class="drink-card" data-price="6">
+                        <div class="drink-text">
+                            <div class="drink-name">王老吉</div>
+                            <div class="drink-price">¥6</div>
+                        </div>
+                        <input type="checkbox" class="drink-checkbox">
+                    </div>
+                    <div class="drink-card" data-price="8">
+                        <div class="drink-text">
+                            <div class="drink-name">贝奇野菜</div>
+                            <div class="drink-price">¥8</div>
+                        </div>
+                        <input type="checkbox" class="drink-checkbox">
+                    </div>
+                    <div class="drink-card" data-price="6">
+                        <div class="drink-text">
+                            <div class="drink-name">健力宝</div>
+                            <div class="drink-price">¥6</div>
+                        </div>
+                        <input type="checkbox" class="drink-checkbox">
+                    </div>
+                    <div class="drink-card" data-price="8">
+                        <div class="drink-text">
+                            <div class="drink-name">鲜果蜂蜜</div>
+                            <div class="drink-price">¥8</div>
+                        </div>
+                        <input type="checkbox" class="drink-checkbox">
+                    </div>
+                    <div class="drink-card" data-price="6">
+                        <div class="drink-text">
+                            <div class="drink-name">番石榴</div>
+                            <div class="drink-price">¥6</div>
+                        </div>
+                        <input type="checkbox" class="drink-checkbox">
+                    </div>
+                    <div class="drink-card" data-price="8">
+                        <div class="drink-text">
+                            <div class="drink-name">百威</div>
+                            <div class="drink-price">¥8</div>
+                        </div>
+                        <input type="checkbox" class="drink-checkbox">
+                    </div>
+                    <div class="drink-card" data-price="6">
+                        <div class="drink-text">
+                            <div class="drink-name">维他茶</div>
+                            <div class="drink-price">¥6</div>
+                        </div>
+                        <input type="checkbox" class="drink-checkbox">
+                    </div>
+                    <div class="drink-card" data-price="10">
+                        <div class="drink-text">
+                            <div class="drink-name">喜力</div>
+                            <div class="drink-price">¥10</div>
+                        </div>
+                        <input type="checkbox" class="drink-checkbox">
+                    </div>
+                    <div class="drink-card" data-price="7">
+                        <div class="drink-text">
+                            <div class="drink-name">豆奶</div>
+                            <div class="drink-price">¥7</div>
+                        </div>
+                        <input type="checkbox" class="drink-checkbox">
+                    </div>
+                    <div class="drink-card" data-price="10">
+                        <div class="drink-text">
+                            <div class="drink-name">科罗娜</div>
+                            <div class="drink-price">¥10</div>
+                        </div>
+                        <input type="checkbox" class="drink-checkbox">
+                    </div>
+                    <div class="drink-card" data-price="7">
+                        <div class="drink-text">
+                            <div class="drink-name">椰子水</div>
+                            <div class="drink-price">¥7</div>
+                        </div>
+                        <input type="checkbox" class="drink-checkbox">
+                    </div>
+                    <div class="drink-card" data-price="10">
+                        <div class="drink-text">
+                            <div class="drink-name">福佳白</div>
+                            <div class="drink-price">¥10</div>
+                        </div>
+                        <input type="checkbox" class="drink-checkbox">
+                    </div>
+                    <div class="drink-card" data-price="7">
+                        <div class="drink-text">
+                            <div class="drink-name">乌龙茶</div>
+                            <div class="drink-price">¥7</div>
+                        </div>
+                        <input type="checkbox" class="drink-checkbox">
+                    </div>
+                    <div class="drink-card" data-price="10">
+                        <div class="drink-text">
+                            <div class="drink-name">蓝妹</div>
+                            <div class="drink-price">¥10</div>
+                        </div>
+                        <input type="checkbox" class="drink-checkbox">
+                    </div>
+                    <div class="drink-card" data-price="7">
+                        <div class="drink-text">
+                            <div class="drink-name">好望水</div>
+                            <div class="drink-price">¥7</div>
+                        </div>
+                        <input type="checkbox" class="drink-checkbox">
+                    </div>
+                    <div class="drink-card" data-price="20">
+                        <div class="drink-text">
+                            <div class="drink-name">大椰汁</div>
+                            <div class="drink-price">¥20</div>
+                        </div>
+                        <input type="checkbox" class="drink-checkbox">
+                    </div>
+                    <div class="drink-card" data-price="6">
+                        <div class="drink-text">
+                            <div class="drink-name">破独</div>
+                            <div class="drink-price">¥6</div>
+                        </div>
+                        <input type="checkbox" class="drink-checkbox">
+                    </div>
+                </div>
+                <button class="btn btn-link" id="confirmDrinkBtn" style="margin-top:8px">确认饮料</button>
+            </div>
+
+            <!-- 结算 -->
+            <div class="total-card">
+                <div class="total-row">
+                    <span>订单总价</span>
+                    <span id="totalPrice">¥0.00</span>
+                </div>
+                <div class="total-row">
+                    <span>可折扣菜金</span>
+                    <span id="foodPrice">¥0.00</span>
+                </div>
+                <div class="discount-row">
+                    <div class="discount-buttons">
+                        <button class="discount-btn active" data-rate="0.68">6.8折</button>
+                        <button class="discount-btn unactive" data-rate="0.58">5.8折</button>
+                    </div>
+                    <span id="discountText">-¥0.00</span>
+                </div>
+                <div class="pay-row">
+                    <span class="pay-label">应付金额</span>
+                    <span class="pay-value" id="payPrice">¥0.00</span>
+                </div>
+                <div class="per-person">人均：<span id="perPerson">¥0.00</span></div>
+            </div>
+
+            <!-- 操作 -->
+            <button class="btn btn-primary reset-btn" id="resetZhufugui">重置小票</button>
+            <button class="btn btn-link" id="addDrinkBtn">点击此处加入饮料</button>
+
+            <div class="time-info">
+                开单时间：<span id="openTimeZhufugui"></span>
+            </div>
+        </div>
+
+        <!-- ========== 自助回本计算器 ========== -->
+        <div class="calc-content" id="buffet-calc">
+            <!-- 自助类型标签页 -->
+            <div class="type-tabs">
+                <div class="type-tab active" data-type="niurou">普通牛肉火锅</div>
+                <div class="type-tab" data-type="shouxishao">寿喜烧/和牛</div>
+                <div class="type-tab" data-type="kaorou">韩式烤肉</div>
+                <div class="type-tab" data-type="haixian">海鲜自助</div>
+            </div>
+
+            <div class="header">
+                <h1>自助回本计算器</h1>
+                <div class="subtitle">点击红色价格数字即可修改</div>
+            </div>
+
+            <!-- 自助价格 -->
+            <div class="section-label">基本信息</div>
+            <div class="item-list">
+                <div class="item-card">
+                    <div class="item-info">
+                        <div class="item-name">自助人均价格</div>
+                    </div>
+                    <div class="num-control">
+                        <input type="text" class="num-input" id="buffetPrice" value="89">
+                        <span>元</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ==================== 1. 普通牛肉火锅（潮汕/川渝） ==================== -->
+            <div class="food-section" data-type="niurou">
+                <div class="section-label">🥩 招牌牛肉（回本最快）</div>
+                <div class="item-list">
+                    <div class="item-card">
+                        <div class="item-info">
+                            <div class="item-name">吊龙/匙柄</div>
+                            <div class="item-price">约 <input type="text" class="price-input" value="28"> 元/盘</div>
+                        </div>
+                        <div class="num-control">
+                            <button class="num-btn minus">-</button>
+                            <input type="text" class="num-input count" value="0">
+                            <button class="num-btn plus">+</button>
+                        </div>
+                    </div>
+                    <div class="item-card">
+                        <div class="item-info">
+                            <div class="item-name">五花趾/三花趾</div>
+                            <div class="item-price">约 <input type="text" class="price-input" value="32"> 元/盘</div>
+                        </div>
+                        <div class="num-control">
+                            <button class="num-btn minus">-</button>
+                            <input type="text" class="num-input count" value="0">
+                            <button class="num-btn plus">+</button>
+                        </div>
+                    </div>
+                    <div class="item-card">
+                        <div class="item-info">
+                            <div class="item-name">雪花肥牛/肥羊</div>
+                            <div class="item-price">约 <input type="text" class="price-input" value="22"> 元/盘</div>
+                        </div>
+                        <div class="num-control">
+                            <button class="num-btn minus">-</button>
+                            <input type="text" class="num-input count" value="0">
+                            <button class="num-btn plus">+</button>
+                        </div>
+                    </div>
+                    <div class="item-card">
+                        <div class="item-info">
+                            <div class="item-name">嫩肉/肥胼</div>
+                            <div class="item-price">约 <input type="text" class="price-input" value="25"> 元/盘</div>
+                        </div>
+                        <div class="num-control">
+                            <button class="num-btn minus">-</button>
+                            <input type="text" class="num-input count" value="0">
+                            <button class="num-btn plus">+</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section-label">🍢 火锅必点</div>
+                <div class="item-list">
+                    <div class="item-card">
+                        <div class="item-info">
+                            <div class="item-name">毛肚/黄喉/鸭肠</div>
+                            <div class="item-price">约 <input type="text" class="price-input" value="18"> 元/盘</div>
+                        </div>
+                        <div class="num-control">
+                            <button class="num-btn minus">-</button>
+                            <input type="text" class="num-input count" value="0">
+                            <button class="num-btn plus">+</button>
+                        </div>
+                    </div>
+                    <div class="item-card">
+                        <div class="item-info">
+                            <div class="item-name">虾滑/鱼滑</div>
+                            <div class="item-price">约 <input type="text" class="price-input" value="15"> 元/份</div>
+                        </div>
+                        <div class="num-control">
+                            <button class="num-btn minus">-</button>
+                            <input type="text" class="num-input count" value="0">
+                            <button class="num-btn plus">+</button>
+                        </div>
+                    </div>
+                    <div class="item-card">
+                        <div class="item-info">
+                            <div class="item-name">鸭血/脑花</div>
+                            <div class="item-price">约 <input type="text" class="price-input" value="12"> 元/份</div>
+                        </div>
+                        <div class="num-control">
+                            <button class="num-btn minus">-</button>
+                            <input type="text" class="num-input count" value="0">
+                            <button class="num-btn plus">+</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section-label">🥬 蔬菜/锅底/主食</div>
+                <div class="item-list">
+                    <div class="item-card">
+                        <div class="item-info">
+                            <div class="item-name">锅底（含小料）</div>
+                            <div class="item-price">约 <input type="text" class="price-input" value="20"> 元/人</div>
+                        </div>
+                        <div class="num-control">
+                            <button class="num-btn minus">-</button>
+                            <input type="text" class="num-input count" value="0">
+                            <button class="num-btn plus">+</button>
+                        </div>
+                    </div>
+                    <div class="item-card">
+                        <div class="item-info">
+                            <div class="item-name">蔬菜拼盘</div>
+                            <div class="item-price">约 <input type="text" class="price-input" value="12"> 元/份</div>
+                        </div>
+                        <div class="num-control">
+                            <button class="num-btn minus">-</button>
+                            <input type="text" class="num-input count" value="0">
+                            <button class="num-btn plus">+</button>
+                        </div>
+                    </div>
+                    <div class="item-card">
+                        <div class="item-info">
+                            <div class="item-name">菌菇拼盘</div>
+                            <div class="item-price">约 <input type="text" class="price-input" value="15"> 元/份</div>
+                        </div>
+                        <div class="num-control">
+                            <button class="num-btn minus">-</button>
+                            <input type="text" class="num-input count" value="0">
+                            <button class="num-btn plus">+</button>
+                        </div>
+                    </div>
+                    <div class="item-card">
+                        <div class="item-info">
+                            <div class="item-name">豆制品（豆腐/腐竹）</div>
+                            <div class="item-price">约 <input type="text" class="price-input" value="8"> 元/份</div>
+                        </div>
+                        <div class="num-control">
+                            <button class="num-btn minus">-</button>
+                            <input type="text" class="num-input count" value="0">
+                            <button class="num-btn plus">+</button>
+                        </div>
+                    </div>
+                    <div class="item-card">
+                        <div class="item-info">
+                            <div class="item-name">主食（面条/米饭）</div>
+                            <div class="item-price">约 <input type="text" class="price-input" value="5"> 元/份</div>
+                        </div>
+                        <div class="num-control">
+                            <button class="num-btn minus">-</button>
+                            <input type="text" class="num-input count" value="0">
+                            <button class="num-btn plus">+</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ==================== 2. 寿喜烧/和牛自助（樱绪同款） ==================== -->
+            <div class="food-section" data-type="shouxishao" style="display: none;">
+                <div class="section-label">🥩 顶级和牛（回本最快）</div>
+                <div class="item-list">
+                    <div class="item-card">
+                        <div class="item-info">
+                            <div class="item-name">M9/M8和牛</div>
+                            <div class="item-price">约 <input type="text" class="price-input" value="50"> 元/盘</div>
+                        </div>
+                        <div class="num-control">
+                            <button class="num-btn minus">-</button>
+                            <input type="text" class="num-input count" value="0">
+                            <button class="num-btn plus">+</button>
+                        </div>
+                    </div>
+                    <div class="item-card">
+                        <div class="item-info">
+                            <div class="item-name">牛五花/牛肩肉</div>
+                            <div class="item-price">约 <input type="text" class="price-input" value="35"> 元/盘</div>
+                        </div>
+                        <div class="num-control">
+                            <button class="num-btn minus">-</button>
+                            <input type="text" class="num-input count" value="0">
+                            <button class="num-btn plus">+</button>
+                        </div>
+                    </div>
+                    <div class="item-card">
+                        <div class="item-info">
+                            <div class="item-name">安格斯肥牛</div>
+                            <div class="item-price">约 <input type="text" class="price-input" value="25"> 元/盘</div>
+                        </div>
+                        <div class="num-control">
+                            <button class="num-btn minus">-</button>
+                            <input type="text" class="num-input count" value="0">
+                            <button class="num-btn plus">+</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section-label">🍣 刺身海鲜</div>
+                <div class="item-list">
+                    <div class="item-card">
+                        <div class="item-info">
+                            <div class="item-name">三文鱼/北极贝</div>
+                            <div class="item-price">约 <input type="text" class="price-input" value="45"> 元/份</div>
+                        </div>
+                        <div class="num-control">
+                            <button class="num-btn minus">-</button>
+                            <input type="text" class="num-input count" value="0">
+                            <button class="num-btn plus">+</button>
+                        </div>
+                    </div>
+                    <div class="item-card">
+                        <div class="item-info">
+                            <div class="item-name">甜虾/牡丹虾</div>
+                            <div class="item-price">约 <input type="text" class="price-input" value="30"> 元/份</div>
+                        </div>
+                        <div class="num-control">
+                            <button class="num-btn minus">-</button>
+                            <input type="text" class="num-input count" value="0">
+                            <button class="num-btn plus">+</button>
+                        </div>
+                    </div>
+                    <div class="item-card">
+                        <div class="item-info">
+                            <div class="item-name">鹅肝手握</div>
+                            <div class="item-price">约 <input type="text" class="price-input" value="20"> 元/个</div>
+                        </div>
+                        <div class="num-control">
+                            <button class="num-btn minus">-</button>
+                            <input type="text" class="num-input count" value="0">
+                            <button class="num-btn plus">+</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section-label">🍢 特色菜品</div>
+                <div class="item-list">
+                    <div class="item-card">
+                        <div class="item-info">
+                            <div class="item-name">烤榴莲</div>
+                            <div class="item-price">约 <input type="text" class="price-input" value="25"> 元/份</div>
+                        </div>
+                        <div class="num-control">
+                            <button class="num-btn minus">-</button>
+                            <input type="text" class="num-input count" value="0">
+                            <button class="num-btn plus">+</button>
+                        </div>
+                    </div>
+                    <div class="item-card">
+                        <div class="item-info">
+                            <div class="item-name">芝士焗虾/扇贝</div>
+                            <div class="item-price">约 <input type="text" class="price-input" value="18"> 元/个</div>
+                        </div>
+                        <div class="num-control">
+                            <button class="num-btn minus">-</button>
+                            <input type="text" class="num-input count" value="0">
+                            <button class="num-btn plus">+</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section-label">🥬 蔬菜/锅底/主食</div>
+                <div class="item-list">
+                    <div class="item-card">
+                        <div class="item-info">
+                            <div class="item-name">寿喜烧锅底</div>
+                            <div class="item-price">约 <input type="text" class="price-input" value="15"> 元/人</div>
+                        </div>
+                        <div class="num-control">
+                            <button class="num-btn minus">-</button>
+                            <input type="text" class="num-input count" value="0">
+                            <button class="num-btn plus">+</button>
+                        </div>
+                    </div>
+                    <div class="item-card">
+                        <div class="item-info">
+                            <div class="item-name">蔬菜拼盘</div>
+                            <div class="item-price">约 <input type="text" class="price-input" value="10"> 元/份</div>
+                        </div>
+                        <div class="num-control">
+                            <button class="num-btn minus">-</button>
+                            <input type="text" class="num-input count" value="0">
+                            <button class="num-btn plus">+</button>
+                        </div>
+                    </div>
+                    <div class="item-card">
+                        <div class="item-info">
+                            <div class="item-name">无菌蛋</div>
+                            <div class="item-price">约 <input type="text" class="price-input" value="3"> 元/个</div>
+                        </div>
+                        <div class="num-control">
+                            <button class="num-btn minus">-</button>
+                            <input type="text" class="num-input count" value="0">
+                            <button class="num-btn plus">+</button>
+                        </div>
+                    </div>
+                    <div class="item-card">
+                        <div class="item-info">
+                            <div class="item-name">乌冬面/米饭</div>
+                            <div class="item-price">约 <input type="text" class="price-input" value="6"> 元/份</div>
+                        </div>
+                        <div class="num-control">
+                            <button class="num-btn minus">-</button>
+                            <input type="text" class="num-input count" value="0">
+                            <button class="num-btn plus">+</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ==================== 3. 韩式烤肉自助 ==================== -->
+            <div class="food-section" data-type="kaorou" style="display: none;">
+                <div class="section-label">🥩 顶级烤肉</div>
+                <div class="item-list">
+                    <div class="item-card">
+                        <div class="item-info">
+                            <div class="item-name">雪花牛小排</div>
+                            <div class="item-price">约 <input type="text" class="price-input" value="40"> 元/盘</div>
+                        </div>
+                        <div class="num-control">
+                            <button class="num-btn minus">-</button>
+                            <input type="text" class="num-input count" value="0">
+                            <button class="num-btn plus">+</button>
+                        </div>
+                    </div>
+                    <div class="item-card">
+                        <div class="item-info">
+                            <div class="item-name">横膈膜/牛肋条</div>
+                            <div class="item-price">约 <input type="text" class="price-input" value="30"> 元/盘</div>
+                        </div>
+                        <div class="num-control">
+                            <button class="num-btn minus">-</button>
+                            <input type="text" class="num-input count" value="0">
+                            <button class="num-btn plus">+</button>
+                        </div>
+                    </div>
+                    <div class="item-card">
+                        <div class="item-info">
+                            <div class="item-name">五花肉/梅花肉</div>
+                            <div class="item-price">约 <input type="text" class="price-input" value="22"> 元/盘</div>
+                        </div>
+                        <div class="num-control">
+                            <button class="num-btn minus">-</button>
+                            <input type="text" class="num-input count" value="0">
+                            <button class="num-btn plus">+</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section-label">🦐 海鲜烤肉</div>
+                <div class="item-list">
+                    <div class="item-card">
+                        <div class="item-info">
+                            <div class="item-name">烤大虾/黑虎虾</div>
+                            <div class="item-price">约 <input type="text" class="price-input" value="25"> 元/只</div>
+                        </div>
+                        <div class="num-control">
+                            <button class="num-btn minus">-</button>
+                            <input type="text" class="num-input count" value="0">
+                            <button class="num-btn plus">+</button>
+                        </div>
+                    </div>
+                    <div class="item-card">
+                        <div class="item-info">
+                            <div class="item-name">烤生蚝/扇贝</div>
+                            <div class="item-price">约 <input type="text" class="price-input" value="15"> 元/个</div>
+                        </div>
+                        <div class="num-control">
+                            <button class="num-btn minus">-</button>
+                            <input type="text" class="num-input count" value="0">
+                            <button class="num-btn plus">+</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section-label">🥬 蔬菜/主食</div>
+                <div class="item-list">
+                    <div class="item-card">
+                        <div class="item-info">
+                            <div class="item-name">生菜/苏子叶</div>
+                            <div class="item-price">约 <input type="text" class="price-input" value="8"> 元/份</div>
+                        </div>
+                        <div class="num-control">
+                            <button class="num-btn minus">-</button>
+                            <input type="text" class="num-input count" value="0">
+                            <button class="num-btn plus">+</button>
+                        </div>
+                    </div>
+                    <div class="item-card">
+                        <div class="item-info">
+                            <div class="item-name">烤蔬菜拼盘</div>
+                            <div class="item-price">约 <input type="text" class="price-input" value="12"> 元/份</div>
+                        </div>
+                        <div class="num-control">
+                            <button class="num-btn minus">-</button>
+                            <input type="text" class="num-input count" value="0">
+                            <button class="num-btn plus">+</button>
+                        </div>
+                    </div>
+                    <div class="item-card">
+                        <div class="item-info">
+                            <div class="item-name">石锅拌饭/冷面</div>
+                            <div class="item-price">约 <input type="text" class="price-input" value="15"> 元/份</div>
+                        </div>
+                        <div class="num-control">
+                            <button class="num-btn minus">-</button>
+                            <input type="text" class="num-input count" value="0">
+                            <button class="num-btn plus">+</button>
+                        </div>
+                    </div>
+                    <div class="item-card">
+                        <div class="item-info">
+                            <div class="item-name">韩式大酱汤</div>
+                            <div class="item-price">约 <input type="text" class="price-input" value="12"> 元/份</div>
+                        </div>
+                        <div class="num-control">
+                            <button class="num-btn minus">-</button>
+                            <input type="text" class="num-input count" value="0">
+                            <button class="num-btn plus">+</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ==================== 4. 海鲜自助 ==================== -->
+            <div class="food-section" data-type="haixian" style="display: none;">
+                <div class="section-label">🦞 顶级海鲜</div>
+                <div class="item-list">
+                    <div class="item-card">
+                        <div class="item-info">
+                            <div class="item-name">小青龙/波龙</div>
+                            <div class="item-price">约 <input type="text" class="price-input" value="80"> 元/只</div>
+                        </div>
+                        <div class="num-control">
+                            <button class="num-btn minus">-</button>
+                            <input type="text" class="num-input count" value="0">
+                            <button class="num-btn plus">+</button>
+                        </div>
+                    </div>
+                    <div class="item-card">
+                        <div class="item-info">
+                            <div class="item-name">大闸蟹/梭子蟹</div>
+                            <div class="item-price">约 <input type="text" class="price-input" value="35"> 元/只</div>
+                        </div>
+                        <div class="num-control">
+                            <button class="num-btn minus">-</button>
+                            <input type="text" class="num-input count" value="0">
+                            <button class="num-btn plus">+</button>
+                        </div>
+                    </div>
+                    <div class="item-card">
+                        <div class="item-info">
+                            <div class="item-name">鲍鱼/海参</div>
+                            <div class="item-price">约 <input type="text" class="price-input" value="25"> 元/只</div>
+                        </div>
+                        <div class="num-control">
+                            <button class="num-btn minus">-</button>
+                            <input type="text" class="num-input count" value="0">
+                            <button class="num-btn plus">+</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section-label">🍣 刺身类</div>
+                <div class="item-list">
+                    <div class="item-card">
+                        <div class="item-info">
+                            <div class="item-name">三文鱼/金枪鱼</div>
+                            <div class="item-price">约 <input type="text" class="price-input" value="45"> 元/份</div>
+                        </div>
+                        <div class="num-control">
+                            <button class="num-btn minus">-</button>
+                            <input type="text" class="num-input count" value="0">
+                            <button class="num-btn plus">+</button>
+                        </div>
+                    </div>
+                    <div class="item-card">
+                        <div class="item-info">
+                            <div class="item-name">甜虾/北极贝</div>
+                            <div class="item-price">约 <input type="text" class="price-input" value="30"> 元/份</div>
+                        </div>
+                        <div class="num-control">
+                            <button class="num-btn minus">-</button>
+                            <input type="text" class="num-input count" value="0">
+                            <button class="num-btn plus">+</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section-label">🥬 蔬菜/锅底/主食</div>
+                <div class="item-list">
+                    <div class="item-card">
+                        <div class="item-info">
+                            <div class="item-name">火锅锅底</div>
+                            <div class="item-price">约 <input type="text" class="price-input" value="18"> 元/人</div>
+                        </div>
+                        <div class="num-control">
+                            <button class="num-btn minus">-</button>
+                            <input type="text" class="num-input count" value="0">
+                            <button class="num-btn plus">+</button>
+                        </div>
+                    </div>
+                    <div class="item-card">
+                        <div class="item-info">
+                            <div class="item-name">海鲜蔬菜拼盘</div>
+                            <div class="item-price">约 <input type="text" class="price-input" value="15"> 元/份</div>
+                        </div>
+                        <div class="num-control">
+                            <button class="num-btn minus">-</button>
+                            <input type="text" class="num-input count" value="0">
+                            <button class="num-btn plus">+</button>
+                        </div>
+                    </div>
+                    <div class="item-card">
+                        <div class="item-info">
+                            <div class="item-name">菌菇拼盘</div>
+                            <div class="item-price">约 <input type="text" class="price-input" value="12"> 元/份</div>
+                        </div>
+                        <div class="num-control">
+                            <button class="num-btn minus">-</button>
+                            <input type="text" class="num-input count" value="0">
+                            <button class="num-btn plus">+</button>
+                        </div>
+                    </div>
+                    <div class="item-card">
+                        <div class="item-info">
+                            <div class="item-name">主食（粥/面）</div>
+                            <div class="item-price">约 <input type="text" class="price-input" value="6"> 元/份</div>
+                        </div>
+                        <div class="num-control">
+                            <button class="num-btn minus">-</button>
+                            <input type="text" class="num-input count" value="0">
+                            <button class="num-btn plus">+</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 通用甜品饮料 -->
+            <div class="section-label">🍰 甜品饮料</div>
+            <div class="item-list">
+                <div class="item-card">
+                    <div class="item-info">
+                        <div class="item-name">哈根达斯/榴莲</div>
+                        <div class="item-price">约 <input type="text" class="price-input" value="15"> 元/份</div>
+                    </div>
+                    <div class="num-control">
+                        <button class="num-btn minus">-</button>
+                        <input type="text" class="num-input count" value="0">
+                        <button class="num-btn plus">+</button>
+                    </div>
+                </div>
+                <div class="item-card">
+                    <div class="item-info">
+                        <div class="item-name">蛋糕/慕斯</div>
+                        <div class="item-price">约 <input type="text" class="price-input" value="8"> 元/块</div>
+                    </div>
+                    <div class="num-control">
+                        <button class="num-btn minus">-</button>
+                        <input type="text" class="num-input count" value="0">
+                        <button class="num-btn plus">+</button>
+                    </div>
+                </div>
+                <div class="item-card">
+                    <div class="item-info">
+                        <div class="item-name">饮料/水果</div>
+                        <div class="item-price">约 <input type="text" class="price-input" value="5"> 元/份</div>
+                    </div>
+                    <div class="num-control">
+                        <button class="num-btn minus">-</button>
+                        <input type="text" class="num-input count" value="0">
+                        <button class="num-btn plus">+</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 结算 -->
+            <div class="total-card">
+                <div class="total-row">
+                    <span>已吃总价值</span>
+                    <span id="totalValue">¥0.00</span>
+                </div>
+                <div class="total-row">
+                    <span>自助价格</span>
+                    <span id="priceDisplay">¥89.00</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+                </div>
+                <div class="pay-row">
+                    <span class="pay-label">回本进度</span>
+                    <span class="pay-value" id="progressPercent">0%</span>
+                </div>
+                <div class="status-text" id="statusText">
+                    还需吃 ¥89.00 才能回本
+                </div>
+            </div>
+
+            <!-- 操作 -->
+            <button class="btn btn-primary" id="resetBuffet">重置</button>
+
+            <div class="time-info">
+                开单时间：<span id="openTimeBuffet"></span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==================== 通用工具函数 ====================
+        const getNowTime = () => {
+            const d = new Date();
+            return `${d.getFullYear()}/${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}:${String(d.getSeconds()).padStart(2,'0')}`;
+        };
+
+        // ==================== 主切换器 ====================
+        let currentCalc = 'zhufugui';
+
+        document.querySelectorAll('.main-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                currentCalc = tab.dataset.calc;
+                
+                // 更新标签状态
+                document.querySelectorAll('.main-tab').forEach(t => {
+                    t.classList.toggle('active', t.dataset.calc === currentCalc);
+                });
+
+                // 切换内容
+                document.querySelectorAll('.calc-content').forEach(content => {
+                    content.classList.toggle('active', content.id === `${currentCalc}-calc`);
+                });
+            });
+        });
+
+        // ==================== 朱富贵计算器逻辑 ====================
+        let zhufuguiTime = getNowTime();
+        let currentRate = 0.68;
+        let drinkSectionVisible = false;
+
+        const validateZhufuguiInput = (input) => {
+            input.addEventListener('input', () => {
+                input.value = input.value.replace(/[^0-9]/g, '') || '0';
+                calcZhufugui();
+                saveZhufuguiLocal();
+            });
+            input.addEventListener('blur', () => {
+                input.value = Math.max(0, parseInt(input.value) || 0);
+                calcZhufugui();
+                saveZhufuguiLocal();
+            });
+        };
+
+        const calcZhufugui = () => {
+            let total = 0, foodPrice = 0, personCount = 0;
+
+            // 计算菜品
+            document.querySelectorAll('#zhufugui-calc .item-card').forEach(card => {
+                const input = card.querySelector('.num-input');
+                const price = parseFloat(input.dataset.price);
+                const num = parseInt(input.value) || 0;
+                total += price * num;
+                if (card.dataset.discountable === 'true') foodPrice += price * num;
+                if (card.querySelector('.item-name').innerText.includes('锅底') || card.querySelector('.item-name').innerText.includes('调料')) {
+                    personCount = Math.max(personCount, num);
+                }
+            });
+
+            // 计算饮料
+            document.querySelectorAll('#zhufugui-calc .drink-card').forEach(card => {
+                if (card.querySelector('.drink-checkbox').checked) total += parseFloat(card.dataset.price);
+            });
+
+            const discountMoney = foodPrice * (1 - currentRate);
+            const payPrice = total - discountMoney;
+            const perPerson = personCount > 0 ? payPrice / personCount : 0;
+
+            // 更新UI
+            document.getElementById('totalPrice').innerText = `¥${total.toFixed(2)}`;
+            document.getElementById('foodPrice').innerText = `¥${foodPrice.toFixed(2)}`;
+            document.getElementById('discountText').innerText = `-¥${discountMoney.toFixed(2)}`;
+            document.getElementById('payPrice').innerText = `¥${payPrice.toFixed(2)}`;
+            document.getElementById('perPerson').innerText = `¥${perPerson.toFixed(2)}`;
+        };
+
+        const saveZhufuguiLocal = () => {
+            const data = {
+                items: Array.from(document.querySelectorAll('#zhufugui-calc .item-card .num-input')).map(i => i.value),
+                drinks: Array.from(document.querySelectorAll('#zhufugui-calc .drink-checkbox')).map(c => c.checked),
+                currentRate,
+                drinkSectionVisible,
+                zhufuguiTime
+            };
+            localStorage.setItem('zhufugui', JSON.stringify(data));
+        };
+
+        const loadZhufuguiLocal = () => {
+            const saved = localStorage.getItem('zhufugui');
+            if (!saved) return;
+            try {
+                const data = JSON.parse(saved);
+                
+                document.querySelectorAll('#zhufugui-calc .item-card .num-input').forEach((input, idx) => input.value = data.items[idx] || 0);
+                document.querySelectorAll('#zhufugui-calc .drink-checkbox').forEach((ck, idx) => ck.checked = data.drinks[idx] || false);
+                
+                currentRate = data.currentRate || 0.68;
+                // 饮料区默认折叠，不恢复之前的状态
+                drinkSectionVisible = false;
+                
+                // 只有当保存的时间有效时才恢复
+                if (data.zhufuguiTime && data.zhufuguiTime.length > 10) {
+                    zhufuguiTime = data.zhufuguiTime;
+                    document.getElementById('openTimeZhufugui').innerText = zhufuguiTime;
+                }
+
+                // 恢复折扣状态
+                document.querySelectorAll('#zhufugui-calc .discount-btn').forEach(btn => {
+                    btn.classList.toggle('active', parseFloat(btn.dataset.rate) === currentRate);
+                    btn.classList.toggle('unactive', parseFloat(btn.dataset.rate) !== currentRate);
+                });
+
+                // 饮料区始终默认折叠
+                document.getElementById('drinkSection').style.display = 'none';
+                document.getElementById('addDrinkBtn').style.display = 'block';
+
+                calcZhufugui();
+            } catch (e) {
+                // 解析失败时忽略
+            }
+        };
+
+        const switchDiscount = (rate) => {
+            currentRate = rate;
+            document.querySelectorAll('#zhufugui-calc .discount-btn').forEach(btn => {
+                btn.classList.toggle('active', parseFloat(btn.dataset.rate) === rate);
+                btn.classList.toggle('unactive', parseFloat(btn.dataset.rate) !== rate);
+            });
+            calcZhufugui();
+            saveZhufuguiLocal();
+        };
+
+        // 朱富贵事件绑定
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('openTimeZhufugui').innerText = zhufuguiTime;
+            
+            // 加减按钮
+            document.querySelectorAll('#zhufugui-calc .plus').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const input = btn.parentElement.querySelector('.num-input');
+                    input.value = parseInt(input.value) + 1;
+                    calcZhufugui();
+                    saveZhufuguiLocal();
+                });
+            });
+
+            document.querySelectorAll('#zhufugui-calc .minus').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const input = btn.parentElement.querySelector('.num-input');
+                    input.value = Math.max(0, parseInt(input.value) - 1);
+                    calcZhufugui();
+                    saveZhufuguiLocal();
+                });
+            });
+
+            // 输入框验证
+            document.querySelectorAll('#zhufugui-calc .item-card .num-input').forEach(input => validateZhufuguiInput(input));
+
+            // 饮料点击
+            document.querySelectorAll('#zhufugui-calc .drink-card').forEach(card => {
+                const ck = card.querySelector('.drink-checkbox');
+                card.addEventListener('click', e => {
+                    if (e.target !== ck) ck.checked = !ck.checked;
+                    calcZhufugui();
+                    saveZhufuguiLocal();
+                });
+                ck.addEventListener('change', () => {
+                    calcZhufugui();
+                    saveZhufuguiLocal();
+                });
+            });
+
+            // 折扣切换
+            document.querySelectorAll('#zhufugui-calc .discount-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    switchDiscount(parseFloat(btn.dataset.rate));
+                });
+            });
+
+            // 重置按钮
+            document.getElementById('resetZhufugui').addEventListener('click', () => {
+                if (confirm('确定要重置所有数据吗？')) {
+                    document.querySelectorAll('#zhufugui-calc .item-card .num-input').forEach(i => i.value = 0);
+                    document.querySelectorAll('#zhufugui-calc .drink-checkbox').forEach(ck => ck.checked = false);
+                    switchDiscount(0.68);
+                    zhufuguiTime = getNowTime();
+                    document.getElementById('openTimeZhufugui').innerText = zhufuguiTime;
+                    // 重置时折叠饮料区
+                    document.getElementById('drinkSection').style.display = 'none';
+                    document.getElementById('addDrinkBtn').style.display = 'block';
+                    drinkSectionVisible = false;
+                    calcZhufugui();
+                    saveZhufuguiLocal();
+                }
+            });
+
+            // 展开饮料
+            document.getElementById('addDrinkBtn').addEventListener('click', () => {
+                document.getElementById('drinkSection').style.display = 'block';
+                document.getElementById('addDrinkBtn').style.display = 'none';
+                drinkSectionVisible = true;
+                saveZhufuguiLocal();
+            });
+
+            // 收起饮料
+            document.getElementById('confirmDrinkBtn').addEventListener('click', () => {
+                document.getElementById('drinkSection').style.display = 'none';
+                document.getElementById('addDrinkBtn').style.display = 'block';
+                drinkSectionVisible = false;
+                saveZhufuguiLocal();
+            });
+
+            loadZhufuguiLocal();
+            calcZhufugui();
+        });
+
+        // ==================== 自助回本计算器逻辑 ====================
+        let buffetTime = getNowTime();
+        let currentType = 'niurou';
+
+        const validateBuffetInput = (input, callback) => {
+            input.addEventListener('input', function() {
+                this.value = this.value.replace(/[^0-9.]/g, '') || '0';
+                if ((this.value.match(/\./g) || []).length > 1) {
+                    this.value = this.value.slice(0, this.value.lastIndexOf('.'));
+                }
+                callback();
+            });
+            input.addEventListener('blur', function() {
+                let val = parseFloat(this.value) || 0;
+                if (val < 0) val = 0;
+                this.value = val;
+                callback();
+            });
+        };
+
+        const calcBuffet = () => {
+            const buffetPrice = parseFloat(document.getElementById('buffetPrice').value) || 0;
+            let totalValue = 0;
+
+            // 只计算当前显示类型的菜品 + 通用甜品饮料
+            document.querySelectorAll('#buffet-calc .item-card').forEach(card => {
+                const cardType = card.closest('.food-section')?.dataset.type;
+                if (!cardType || cardType === currentType) {
+                    const price = parseFloat(card.querySelector('.price-input')?.value) || 0;
+                    const count = parseInt(card.querySelector('.count')?.value) || 0;
+                    totalValue += price * count;
+                }
+            });
+
+            // 计算进度
+            const progress = buffetPrice > 0 ? Math.min(totalValue / buffetPrice * 100, 200) : 0;
+            const isProfit = totalValue >= buffetPrice;
+            const profit = totalValue - buffetPrice;
+            const need = Math.max(0, buffetPrice - totalValue);
+
+            // 更新UI
+            document.getElementById('totalValue').innerText = `¥${totalValue.toFixed(2)}`;
+            document.getElementById('priceDisplay').innerText = `¥${buffetPrice.toFixed(2)}`;
+            document.getElementById('progressFill').style.width = `${Math.min(progress, 100)}%`;
+            document.getElementById('progressFill').classList.toggle('good', isProfit);
+            document.getElementById('progressPercent').innerText = `${progress.toFixed(1)}%`;
+            document.getElementById('progressPercent').classList.toggle('good', isProfit);
+
+            // 更新状态
+            if (isProfit) {
+                document.getElementById('statusText').innerText = `🎉 已赚 ¥${profit.toFixed(2)}！继续吃就是纯赚`;
+                document.getElementById('statusText').classList.add('good');
+                document.getElementById('statusText').classList.remove('bad');
+            } else {
+                document.getElementById('statusText').innerText = `还需吃 ¥${need.toFixed(2)} 才能回本`;
+                document.getElementById('statusText').classList.add('bad');
+                document.getElementById('statusText').classList.remove('good');
+            }
+        };
+
+        const switchBuffetType = (type) => {
+            currentType = type;
+            
+            // 更新标签页状态
+            document.querySelectorAll('.type-tab').forEach(tab => {
+                tab.classList.toggle('active', tab.dataset.type === type);
+            });
+
+            // 显示对应菜品
+            document.querySelectorAll('.food-section').forEach(section => {
+                section.style.display = section.dataset.type === type ? 'block' : 'none';
+            });
+
+            calcBuffet();
+        };
+
+        // 自助计算器事件绑定
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('openTimeBuffet').innerText = buffetTime;
+            
+            // 类型标签页切换
+            document.querySelectorAll('.type-tab').forEach(tab => {
+                tab.addEventListener('click', () => {
+                    switchBuffetType(tab.dataset.type);
+                });
+            });
+
+            // 加减按钮
+            document.querySelectorAll('#buffet-calc .plus').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const input = btn.parentElement.querySelector('.count');
+                    input.value = parseInt(input.value) + 1;
+                    calcBuffet();
+                });
+            });
+
+            document.querySelectorAll('#buffet-calc .minus').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const input = btn.parentElement.querySelector('.count');
+                    input.value = Math.max(0, parseInt(input.value) - 1);
+                    calcBuffet();
+                });
+            });
+
+            // 价格和数量输入框验证
+            document.querySelectorAll('#buffet-calc .price-input, #buffet-calc .num-input').forEach(input => {
+                validateBuffetInput(input, calcBuffet);
+            });
+
+            // 重置按钮
+            document.getElementById('resetBuffet').addEventListener('click', () => {
+                if (confirm('确定要重置所有数据吗？')) {
+                    document.querySelectorAll('#buffet-calc .count').forEach(i => i.value = 0);
+                    buffetTime = getNowTime();
+                    document.getElementById('openTimeBuffet').innerText = buffetTime;
+                    calcBuffet();
+                }
+            });
+
+            calcBuffet();
+        });
+    </script>
+</body>
+</html>
