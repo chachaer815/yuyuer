@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>📦 进度回复系统 · 使用指南</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;background:#f5f7fa;color:#333;line-height:1.8;padding:0}
+.hero{background:linear-gradient(135deg,#667eea 0,#764ba2 100%);color:#fff;padding:40px 20px;text-align:center}
+.hero h1{font-size:32px;margin-bottom:8px}
+.hero p{opacity:.85;font-size:15px}
+.container{max-width:860px;margin:0 auto;padding:24px 20px}
+.card{background:#fff;border-radius:12px;padding:28px;margin-bottom:20px;box-shadow:0 2px 12px rgba(0,0,0,.06)}
+.card h2{font-size:20px;margin-bottom:18px;padding-bottom:10px;border-bottom:2px solid #667eea}
+.card h3{font-size:16px;color:#667eea;margin:16px 0 8px}
+.rules{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:16px}
+.rule{background:#f8f9ff;border-radius:8px;padding:14px;text-align:center}
+.rule .icon{font-size:28px;margin-bottom:4px}
+.rule .label{font-size:12px;color:#888;margin-bottom:2px}
+.rule .text{font-size:14px;font-weight:600}
+table{width:100%;border-collapse:collapse;font-size:13px;margin:12px 0}
+th{background:#f0f4ff;color:#555;font-weight:600;text-align:left;padding:10px 12px;border-bottom:2px solid #dde4f5}
+td{padding:10px 12px;border-bottom:1px solid #eee}
+tr:hover td{background:#fafbff}
+.tag{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600}
+.tag-deliver{background:#fff8f0;color:#e67e22}
+.tag-return{background:#fef0f0;color:#e74c3c}
+.tag-photo{background:#f0f0ff;color:#667eea}
+.tag-bring{background:#f0fff4;color:#27ae60}
+.flow{background:#f8f9ff;border-left:4px solid #667eea;padding:16px 20px;border-radius:4px;margin:12px 0;font-size:13px;font-family:monospace;white-space:pre-line}
+.steps{margin:8px 0;padding-left:20px}
+.steps li{margin:6px 0;font-size:14px}
+.footer{text-align:center;color:#aaa;font-size:12px;padding:20px;margin-top:20px}
+@media print{.hero{padding:20px}.card{break-inside:avoid;box-shadow:none;border:1px solid #eee}}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <h1>📦 进度回复系统</h1>
+  <p>全流程覆盖：录单 → 物流跟踪 → 配送循环 → 验货收回 · 三角色实时协同</p>
+</div>
+
+<div class="container">
+
+<!-- 通用规则 -->
+<div class="card">
+  <h2>🚨 通用规则</h2>
+  <div class="rules">
+    <div class="rule">
+      <div class="icon">🔄</div>
+      <div class="label">每次打开先刷新</div>
+      <div class="text">点右上角刷新按钮</div>
+    </div>
+    <div class="rule">
+      <div class="icon">🔝</div>
+      <div class="label">标题栏固定悬浮</div>
+      <div class="text">滚动不消失，随时刷新</div>
+    </div>
+    <div class="rule">
+      <div class="icon">⚡</div>
+      <div class="label">实时数据同步</div>
+      <div class="text">改状态填时间双方可见</div>
+    </div>
+    <div class="rule">
+      <div class="icon">📱</div>
+      <div class="label">多端兼容</div>
+      <div class="text">电脑浏览器 / 手机微信</div>
+    </div>
+  </div>
+</div>
+
+<!-- 管理员 -->
+<div class="card">
+  <h2>👤 管理员</h2>
+  <h3>📋 录新单</h3>
+  <ol class="steps">
+    <li>点击「订单新增」标签</li>
+    <li>填写到款单号 → 搜索选择业务员（支持关键词模糊搜索）</li>
+    <li>添加产品明细：型号 / 数量 / 货期</li>
+    <li>支持从 Excel 直接粘贴多行产品数据</li>
+    <li>点击「添加订单」提交，自动流转至仓库面板</li>
+  </ol>
+  <h3>👥 业务员管理</h3>
+  <ol class="steps">
+    <li>点击「业务员管理」标签</li>
+    <li>添加业务员（姓名 + 识别码）或停用已有业务员</li>
+    <li>设置「归属主管」，被设为下属的业务员订单会出现在主管的团队面板中</li>
+  </ol>
+</div>
+
+<!-- 操作员 -->
+<div class="card">
+  <h2>🏭 操作员</h2>
+  <h3>🔍 智能筛选栏</h3>
+  <table>
+    <tr><th>筛选</th><th>触发条件</th><th>使用场景</th></tr>
+    <tr>
+      <td><span class="tag tag-deliver">📅 待送货</span></td>
+      <td>业务员选了送货/验货时间，尚未送出</td>
+      <td>每天一筛，知道今天要送哪些</td>
+    </tr>
+    <tr>
+      <td><span class="tag tag-return">📅 待收回</span></td>
+      <td>业务员选了收回时间，尚未收回</td>
+      <td>验货/发货后筛出要拿回来的</td>
+    </tr>
+    <tr>
+      <td><span class="tag tag-photo">📸 需拍照</span></td>
+      <td>业务员点了拍照请求</td>
+      <td>到货后拍照上传</td>
+    </tr>
+    <tr>
+      <td><span class="tag tag-photo">📸 待拍照</span></td>
+      <td>有请求但未上传</td>
+      <td>优先处理</td>
+    </tr>
+    <tr>
+      <td><span class="tag tag-photo">📷 已拍照</span></td>
+      <td>已上传图片</td>
+      <td>检查是否完善</td>
+    </tr>
+    <tr>
+      <td><span class="tag tag-bring">✅ 需带来</span></td>
+      <td>业务员选了「是」</td>
+      <td>确认哪些单要拿过去</td>
+    </tr>
+  </table>
+
+  <h3>📦 完整操作流程</h3>
+  <div class="flow">新单（待处理）→ 调货中 → 路途中 → 已到货
+                                    ↓
+                          筛「待送货」→ 日期橙色高亮
+                          点【送货】→ ✓ 已送
+                                    ↓
+                          筛「待收回」→ 点【收回】
+                          （日期、是否带来自动重置）
+                                    ↓
+                          可多次循环送/收
+                          结束：手动改「已完结」</div>
+
+  <h3>💡 快捷操作</h3>
+  <ol class="steps">
+    <li>状态下拉、预计发货时间、进度回复：直接编辑，自动保存</li>
+    <li>单据日期 / 送货时间表头可点击排序</li>
+    <li>已送出的订单，点 ↩️ 可撤销</li>
+    <li>已收回的订单，可重新送货（支持多次循环）</li>
+  </ol>
+</div>
+
+<!-- 业务员 -->
+<div class="card">
+  <h2>💼 业务员</h2>
+  <h3>🔐 身份确认</h3>
+  <p>登录后输入你的识别码，系统自动识别身份。主管会额外显示「我的订单 | 👑 团队订单」切换栏。</p>
+
+  <h3>🔍 查订单</h3>
+  <p>点击「搜索」查看自己全部订单，也可按到款单号或状态精确筛选。</p>
+
+  <h3>📝 订单操作面板</h3>
+  <table>
+    <tr><th>字段</th><th>说明</th></tr>
+    <tr><td>📸 <strong>拍照请求</strong></td><td>需要仓库拍照 → 选「是」并填写拍照要求（如"拍外箱+内件"）</td></tr>
+    <tr><td>✅ <strong>是否带来</strong></td><td>需要仓库拿货过来 → 选「是」</td></tr>
+    <tr><td>📅 <strong>送货时间</strong></td><td>预计哪天送货（<em>到货后才能选</em>，选后橙色高亮）</td></tr>
+    <tr><td>🔍 <strong>验货时间</strong></td><td>需要验货的，选验货日期</td></tr>
+    <tr><td>📥 <strong>收回时间</strong></td><td>预计哪天仓库来收回</td></tr>
+  </table>
+
+  <div class="flow">需要拿货 → 选「是否带来：是」→ 填对应时间
+    · 送货 → 填「送货时间」（到货后才可选）
+    · 验货 → 填「验货时间」
+    · 收回 → 填「收回时间」
+  仓库筛「待送货/待收回」看到 → 执行送/收</div>
+</div>
+
+<!-- 主管 -->
+<div class="card">
+  <h2>👑 主管</h2>
+  <ol class="steps">
+    <li>登录后输入识别码，自动出现「我的订单 | 👑 团队订单」切换栏</li>
+    <li>团队订单显示每个业务员名字及订单状态</li>
+    <li>可点击「⚠️ 逾期未收回」筛选超期订单</li>
+    <li>主管只读查看，不修改下属订单</li>
+  </ol>
+</div>
+
+</div>
+
+<div class="footer">
+  进度回复系统 · 使用指南 · 2026
+</div>
+
+</body>
+</html>
