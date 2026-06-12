@@ -7,9 +7,9 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;background:#f5f7fa;color:#333;line-height:1.8;padding:0}
-.hero{background:linear-gradient(135deg,#667eea 0,#764ba2 100%);color:#fff;padding:40px 20px;text-align:center}
-.hero h1{font-size:32px;margin-bottom:8px}
-.hero p{opacity:.85;font-size:15px}
+.hero{background:#fff;color:#1e293b;padding:0 20px;height:52px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 1px 3px rgba(0,0,0,.06);border-bottom:1px solid #e2e8f0;position:sticky;top:0;z-index:100}
+.hero h1{font-size:16px;font-weight:700;color:#4f6ef7;margin:0}
+.hero p{font-size:13px;color:#64748b}
 .container{max-width:860px;margin:0 auto;padding:24px 20px}
 .card{background:#fff;border-radius:12px;padding:28px;margin-bottom:20px;box-shadow:0 2px 12px rgba(0,0,0,.06)}
 .card h2{font-size:20px;margin-bottom:18px;padding-bottom:10px;border-bottom:2px solid #667eea}
@@ -80,7 +80,7 @@ tr:hover td{background:#fafbff}
     <li>填写到款单号 → 搜索选择业务员（支持关键词模糊搜索）</li>
     <li>添加产品明细：型号 / 数量 / 货期</li>
     <li>支持从 Excel 直接粘贴多行产品数据</li>
-    <li>点击「添加订单」提交，自动流转至仓库面板</li>
+    <li>点击「添加订单」提交，自动流转至操作员面板</li>
   </ol>
   <h3>👥 业务员管理</h3>
   <ol class="steps">
@@ -97,7 +97,7 @@ tr:hover td{background:#fafbff}
   <table>
     <tr><th>筛选</th><th>触发条件</th><th>使用场景</th></tr>
     <tr>
-      <td><span class="tag tag-deliver">📅 待送货</span></td>
+      <td><span class="tag tag-deliver">📅 待发货</span></td>
       <td>业务员选了送货/验货时间，尚未送出</td>
       <td>每天一筛，知道今天要送哪些</td>
     </tr>
@@ -131,7 +131,7 @@ tr:hover td{background:#fafbff}
   <h3>📦 完整操作流程</h3>
   <div class="flow">新单（待处理）→ 调货中 → 路途中 → 已到货
                                     ↓
-                          筛「待送货」→ 日期橙色高亮
+                          筛「待发货」→ 日期橙色高亮
                           点【送货】→ ✓ 已送
                                     ↓
                           筛「待收回」→ 点【收回】
@@ -143,7 +143,7 @@ tr:hover td{background:#fafbff}
   <h3>💡 快捷操作</h3>
   <ol class="steps">
     <li>状态下拉、预计发货时间、进度回复：直接编辑，自动保存</li>
-    <li>单据日期 / 送货时间表头可点击排序</li>
+    <li>单据日期 / 业务发货时间表头可点击排序</li>
     <li>已送出的订单，点 ↩️ 可撤销</li>
     <li>已收回的订单，可重新送货（支持多次循环）</li>
   </ol>
@@ -161,18 +161,18 @@ tr:hover td{background:#fafbff}
   <h3>📝 订单操作面板</h3>
   <table>
     <tr><th>字段</th><th>说明</th></tr>
-    <tr><td>📸 <strong>拍照请求</strong></td><td>需要仓库拍照 → 选「是」并填写拍照要求（如"拍外箱+内件"）</td></tr>
-    <tr><td>✅ <strong>是否带来</strong></td><td>需要仓库拿货过来 → 选「是」</td></tr>
-    <tr><td>📅 <strong>送货时间</strong></td><td>预计哪天送货（<em>到货后才能选</em>，选后橙色高亮）</td></tr>
+    <tr><td>📸 <strong>拍照请求</strong></td><td>需要操作员拍照 → 选「是」并填写拍照要求（如"拍外箱+内件"）</td></tr>
+    <tr><td>✅ <strong>是否带来</strong></td><td>需要操作员拿货过来 → 选「是」</td></tr>
+    <tr><td>📅 <strong>业务发货时间</strong></td><td>预计哪天送货（<em>到货后才能选</em>，选后橙色高亮）</td></tr>
     <tr><td>🔍 <strong>验货时间</strong></td><td>需要验货的，选验货日期</td></tr>
-    <tr><td>📥 <strong>收回时间</strong></td><td>预计哪天仓库来收回</td></tr>
+    <tr><td>📥 <strong>收回时间</strong></td><td>预计哪天操作员来收回</td></tr>
   </table>
 
   <div class="flow">需要拿货 → 选「是否带来：是」→ 填对应时间
-    · 送货 → 填「送货时间」（到货后才可选）
+    · 送货 → 填「业务发货时间」（到货后才可选）
     · 验货 → 填「验货时间」
     · 收回 → 填「收回时间」
-  仓库筛「待送货/待收回」看到 → 执行送/收</div>
+  操作员筛「待发货/待收回」看到 → 执行送/收</div>
 </div>
 
 <!-- 主管 -->
