@@ -28,10 +28,12 @@ tr:hover td{background:#fafbff}
 .tag-return{background:#fef0f0;color:#e74c3c}
 .tag-photo{background:#f0f0ff;color:#667eea}
 .tag-bring{background:#f0fff4;color:#27ae60}
+.tag-complete{background:#f5f0ff;color:#7c3aed}
 .flow{background:#f8f9ff;border-left:4px solid #667eea;padding:16px 20px;border-radius:4px;margin:12px 0;font-size:13px;font-family:monospace;white-space:pre-line}
 .steps{margin:8px 0;padding-left:20px}
 .steps li{margin:6px 0;font-size:14px}
 .footer{text-align:center;color:#aaa;font-size:12px;padding:20px;margin-top:20px}
+.roles-table td:first-child{font-weight:600;white-space:nowrap}
 @media print{.hero{padding:20px}.card{break-inside:avoid;box-shadow:none;border:1px solid #eee}}
 </style>
 </head>
@@ -39,7 +41,7 @@ tr:hover td{background:#fafbff}
 
 <div class="hero">
   <h1>📦 进度回复系统</h1>
-  <p>全流程覆盖：录单 → 物流跟踪 → 配送循环 → 验货收回 · 三角色实时协同</p>
+  <p>全流程覆盖：录单 → 物流跟踪 → 送货/收回 → 验货循环 · 三角色实时协同</p>
 </div>
 
 <div class="container">
@@ -74,14 +76,16 @@ tr:hover td{background:#fafbff}
 <!-- 管理员 -->
 <div class="card">
   <h2>👤 管理员</h2>
+
   <h3>📋 录新单</h3>
   <ol class="steps">
     <li>点击「订单新增」标签</li>
     <li>填写到款单号 → 搜索选择业务员（支持关键词模糊搜索）</li>
     <li>添加产品明细：型号 / 数量 / 货期</li>
     <li>支持从 Excel 直接粘贴多行产品数据</li>
-    <li>点击「添加订单」提交，自动流转至操作员面板</li>
+    <li>点击「提交订单」，自动流转至操作员面板</li>
   </ol>
+
   <h3>👥 业务员管理</h3>
   <ol class="steps">
     <li>点击「业务员管理」标签</li>
@@ -93,32 +97,33 @@ tr:hover td{background:#fafbff}
 <!-- 操作员 -->
 <div class="card">
   <h2>🏭 操作员</h2>
+
   <h3>🔍 智能筛选栏</h3>
   <table>
     <tr><th>筛选</th><th>触发条件</th><th>使用场景</th></tr>
     <tr>
       <td><span class="tag tag-deliver">📅 待发货</span></td>
-      <td>业务员选了送货/验货时间，尚未送出</td>
+      <td>已到货 + 有验货/发货时间，尚未送货</td>
       <td>每天一筛，知道今天要送哪些</td>
     </tr>
     <tr>
       <td><span class="tag tag-return">📅 待收回</span></td>
-      <td>业务员选了收回时间，尚未收回</td>
+      <td>已到货 + 有收回时间，尚未收回</td>
       <td>验货/发货后筛出要拿回来的</td>
     </tr>
     <tr>
-      <td><span class="tag tag-photo">📸 需拍照</span></td>
-      <td>业务员点了拍照请求</td>
-      <td>到货后拍照上传</td>
+      <td><span class="tag tag-complete">📋 待完结</span></td>
+      <td>有业务发货时间 + 未完结</td>
+      <td>业务员填完发货时间，一键改完结</td>
     </tr>
     <tr>
       <td><span class="tag tag-photo">📸 待拍照</span></td>
-      <td>有请求但未上传</td>
+      <td>有拍照请求但未上传</td>
       <td>优先处理</td>
     </tr>
     <tr>
       <td><span class="tag tag-photo">📷 已拍照</span></td>
-      <td>已上传图片</td>
+      <td>已上传照片</td>
       <td>检查是否完善</td>
     </tr>
     <tr>
@@ -127,6 +132,7 @@ tr:hover td{background:#fafbff}
       <td>确认哪些单要拿过去</td>
     </tr>
   </table>
+  <p style="font-size:12px;color:#999;margin-top:4px">💡 状态下拉 + 到款单号搜索 + 以上 checkbox 可任意组合使用</p>
 
   <h3>📦 完整操作流程</h3>
   <div class="flow">新单（待处理）→ 调货中 → 路途中 → 已到货
@@ -134,45 +140,57 @@ tr:hover td{background:#fafbff}
                           筛「待发货」→ 日期橙色高亮
                           点【送货】→ ✓ 已送
                                     ↓
-                          筛「待收回」→ 点【收回】
-                          （日期、是否带来自动重置）
+                          业务员填「业务发货时间」
+                          筛「待完结」→ 改「已完结」
                                     ↓
-                          可多次循环送/收
-                          结束：手动改「已完结」</div>
+                    （如需收回）业务员填「收回时间」
+                          筛「待收回」→ 点【收回】
+                          （验货日期、是否带来自动清空）
+                                    ↓
+                          可多次循环送/收/完结
+                          支持尾款后重新送货</div>
 
   <h3>💡 快捷操作</h3>
   <ol class="steps">
     <li>状态下拉、预计发货时间、进度回复：直接编辑，自动保存</li>
     <li>单据日期 / 业务发货时间表头可点击排序</li>
     <li>已送出的订单，点 ↩️ 可撤销</li>
-    <li>已收回的订单，可重新送货（支持多次循环）</li>
+    <li>已收回的订单，清空验货/带来后可重新送货（支持多次循环）</li>
   </ol>
 </div>
 
 <!-- 业务员 -->
 <div class="card">
   <h2>💼 业务员</h2>
+
   <h3>🔐 身份确认</h3>
   <p>登录后输入你的识别码，系统自动识别身份。主管会额外显示「我的订单 | 👑 团队订单」切换栏。</p>
 
   <h3>🔍 查订单</h3>
-  <p>点击「搜索」查看自己全部订单，也可按到款单号或状态精确筛选。</p>
+  <p>点击「搜索」查看自己全部订单，也可按到款单号或状态下拉精确筛选（选完自动出结果，无需点搜索）。「重置」可清空搜索返回首页。</p>
 
   <h3>📝 订单操作面板</h3>
   <table>
     <tr><th>字段</th><th>说明</th></tr>
-    <tr><td>📸 <strong>拍照请求</strong></td><td>需要操作员拍照 → 选「是」并填写拍照要求（如"拍外箱+内件"）</td></tr>
+    <tr><td>📸 <strong>拍照请求</strong></td><td>需要操作员拍照 → 勾选并填写拍照要求（如"拍外箱+内件"）</td></tr>
     <tr><td>✅ <strong>是否带来</strong></td><td>需要操作员拿货过来 → 选「是」</td></tr>
-    <tr><td>📅 <strong>业务发货时间</strong></td><td>预计哪天送货（<em>到货后才能选</em>，选后橙色高亮）</td></tr>
+    <tr><td>📅 <strong>业务发货时间</strong></td><td>预计哪天送货（<em>到货后才能选</em>，选后日期橙色高亮）</td></tr>
     <tr><td>🔍 <strong>验货时间</strong></td><td>需要验货的，选验货日期</td></tr>
-    <tr><td>📥 <strong>收回时间</strong></td><td>预计哪天操作员来收回</td></tr>
+    <tr><td>📥 <strong>收回时间</strong></td><td>预计哪天操作员来收回（<em>完结后才能选</em>）</td></tr>
   </table>
 
+  <h3>📌 时间填写规则</h3>
   <div class="flow">需要拿货 → 选「是否带来：是」→ 填对应时间
     · 送货 → 填「业务发货时间」（到货后才可选）
     · 验货 → 填「验货时间」
     · 收回 → 填「收回时间」
   操作员筛「待发货/待收回」看到 → 执行送/收</div>
+
+  <h3>📝 进度回复</h3>
+  <p>操作员填写的进度回复显示在订单卡片上，超 20 字自动截断。鼠标悬停可查看完整内容。</p>
+
+  <h3>🔔 通知中心</h3>
+  <p>右上角铃铛显示未读通知数。操作员改状态 / 添加进度回复 / 上传照片后自动推送。点通知直接定位到对应订单，支持「全部已读」和「清空」。</p>
 </div>
 
 <!-- 主管 -->
@@ -184,6 +202,41 @@ tr:hover td{background:#fafbff}
     <li>可点击「⚠️ 逾期未收回」筛选超期订单</li>
     <li>主管只读查看，不修改下属订单</li>
   </ol>
+</div>
+
+<!-- 角色总览 -->
+<div class="card">
+  <h2>📊 角色与流程总览</h2>
+  <table class="roles-table">
+    <tr><th>角色</th><th>核心功能</th><th>权限</th></tr>
+    <tr>
+      <td>管理员</td>
+      <td>录新单 · 业务员管理 · 设置归属主管</td>
+      <td>全部管理权限</td>
+    </tr>
+    <tr>
+      <td>操作员</td>
+      <td>智能筛选 · 送货/收回循环 · 拍照上传 · 编辑状态</td>
+      <td>订单执行操作</td>
+    </tr>
+    <tr>
+      <td>业务员</td>
+      <td>查订单 · 拍照请求 · 验货/发货/收回时间 · 通知</td>
+      <td>自有订单操作</td>
+    </tr>
+    <tr>
+      <td>主管</td>
+      <td>团队订单查看 · 逾期筛选</td>
+      <td>只读查看下属</td>
+    </tr>
+  </table>
+  <div class="flow" style="margin-top:16px">管理员录单 → 操作员处理（新单→调货→路途→到货）
+                ↓
+业务员设置时间需求（发货/验货/收回） + 拍照请求
+                ↓
+操作员执行送/收循环（可多次）
+                ↓
+手动改「已完结」结束 · 支持尾款后循环</div>
 </div>
 
 </div>
