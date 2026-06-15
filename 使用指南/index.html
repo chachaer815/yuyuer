@@ -114,7 +114,7 @@ tr:hover td{background:#fafbff}
     <tr>
       <td><span class="tag tag-complete">📋 待完结</span></td>
       <td>有业务发货时间 + 未完结</td>
-      <td>业务员填完发货时间，一键改完结</td>
+      <td>业务员填了发货时间，点击直接改完结</td>
     </tr>
     <tr>
       <td><span class="tag tag-photo">📸 待拍照</span></td>
@@ -137,8 +137,7 @@ tr:hover td{background:#fafbff}
   <h3>📦 完整操作流程</h3>
   <div class="flow">新单（待处理）→ 调货中 → 路途中 → 已到货
                                     ↓
-                          筛「待发货」→ 日期橙色高亮
-                          点【送货】→ ✓ 已送
+                          筛「待发货」→ 点【送货】→ ✓ 已送
                                     ↓
                           业务员填「业务发货时间」
                           筛「待完结」→ 改「已完结」
@@ -147,8 +146,7 @@ tr:hover td{background:#fafbff}
                           筛「待收回」→ 点【收回】
                           （验货日期、是否带来自动清空）
                                     ↓
-                          可多次循环送/收/完结
-                          支持尾款后重新送货</div>
+                          可多次循环（验货→送货→完结→收回→再验货）</div>
 
   <h3>💡 快捷操作</h3>
   <ol class="steps">
@@ -174,17 +172,17 @@ tr:hover td{background:#fafbff}
     <tr><th>字段</th><th>说明</th></tr>
     <tr><td>📸 <strong>拍照请求</strong></td><td>需要操作员拍照 → 勾选并填写拍照要求（如"拍外箱+内件"）</td></tr>
     <tr><td>✅ <strong>是否带来</strong></td><td>需要操作员拿货过来 → 选「是」</td></tr>
-    <tr><td>📅 <strong>业务发货时间</strong></td><td>预计哪天送货（<em>到货后才能选</em>，选后日期橙色高亮）</td></tr>
+    <tr><td>📅 <strong>业务发货时间</strong></td><td>操作员送货后，填这个日期通知操作员改已完结（<em>到货后才能选</em>）</td></tr>
     <tr><td>🔍 <strong>验货时间</strong></td><td>需要验货的，选验货日期</td></tr>
     <tr><td>📥 <strong>收回时间</strong></td><td>预计哪天操作员来收回（<em>完结后才能选</em>）</td></tr>
   </table>
 
   <h3>📌 时间填写规则</h3>
   <div class="flow">需要拿货 → 选「是否带来：是」→ 填对应时间
-    · 送货 → 填「业务发货时间」（到货后才可选）
     · 验货 → 填「验货时间」
+    · 送货后 → 填「业务发货时间」→ 操作员筛「待完结」改已完结
     · 收回 → 填「收回时间」
-  操作员筛「待发货/待收回」看到 → 执行送/收</div>
+  操作员筛「待发货/待收回/待完结」看到 → 执行送/收/完结</div>
 
   <h3>📝 进度回复</h3>
   <p>操作员填写的进度回复显示在订单卡片上，超 20 字自动截断。鼠标悬停可查看完整内容。</p>
@@ -232,7 +230,7 @@ tr:hover td{background:#fafbff}
   </table>
   <div class="flow" style="margin-top:16px">管理员录单 → 操作员处理（新单→调货→路途→到货）
                 ↓
-业务员设置时间需求（发货/验货/收回） + 拍照请求
+业务员填写验货/发货/收回时间 + 拍照请求
                 ↓
 操作员执行送/收循环（可多次）
                 ↓
